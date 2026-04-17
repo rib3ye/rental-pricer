@@ -262,8 +262,17 @@
 
     <div id="gate-create">
       <div class="row">
-        <label>Set a password for this shared list</label>
+        <label>Password for this shared list</label>
         <input type="password" id="create-password" placeholder="Anyone with the link will need this" />
+      </div>
+      <div class="row">
+        <label>GitHub Personal Access Token (gist scope)</label>
+        <input type="password" id="create-pat" placeholder="github_pat_... or ghp_..." />
+        <small style="color:var(--muted); font-size:11px;">
+          <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:var(--accent);">Create a fine-grained PAT</a>
+          — Account permissions → <strong>Gists: Read and write</strong>. No repo scope needed.
+          This token travels in the share URL so anyone with the link can write.
+        </small>
       </div>
       <div class="actions">
         <button class="primary" onclick="createList()">Create list</button>
@@ -272,8 +281,8 @@
 
     <div id="gate-join" style="display:none;">
       <div class="row">
-        <label>List ID</label>
-        <input type="text" id="join-id" placeholder="e.g. 1234567890abcdef..." />
+        <label>Paste the share link</label>
+        <input type="text" id="join-link" placeholder="https://…/shared.html#gist=…&t=…" />
       </div>
       <div class="row">
         <label>Password</label>
@@ -566,9 +575,11 @@
 
         <h3>Security notes on this tool</h3>
         <ul>
-          <li>The password gate is client-side only. Anyone with browser dev tools can read the stored data. Do not store sensitive PII here.</li>
-          <li>Shared storage uses jsonblob.com — a free public JSON service. The list is technically accessible to anyone who knows or guesses the blob ID. The password is only local UI protection.</li>
-          <li>jsonblob may go offline or purge unused blobs. Do not treat this as authoritative storage. Keep a local copy of important data (see Settings → Export).</li>
+          <li>Shared data is stored in a <strong>public GitHub Gist</strong>. Anyone on the internet who knows the gist ID can read the raw JSON — including the password hash. The password gate is a UI barrier only, not cryptographic protection.</li>
+          <li>The GitHub PAT travels in the <strong>URL hash fragment</strong>. Treat the share link like a credential: don't post it publicly, don't paste it into analytics-laden tools. URL fragments aren't sent in HTTP requests, but they do land in browser history, extensions, and clipboard.</li>
+          <li>Use a <strong>fine-grained PAT</strong> scoped to Gists only (Account permissions → Gists: Read and write). If the link leaks, revoke the PAT at <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--accent);">github.com/settings/tokens</a> — blast radius is limited to gists on your account.</li>
+          <li>Do not store sensitive PII (SSNs, account numbers, tenant personal info). Put it somewhere with real access controls.</li>
+          <li>Use Settings → Export regularly to keep a local JSON backup.</li>
         </ul>
       </div>
 
@@ -582,12 +593,20 @@
     <h2>Settings</h2>
 
     <div class="row">
-      <label>Shared list ID</label>
+      <label>Gist ID</label>
       <input type="text" id="set-listId" readonly />
     </div>
     <div class="row">
       <label>Share link</label>
       <input type="text" id="set-shareLink" readonly />
+    </div>
+    <div class="row">
+      <label>GitHub PAT (for writes)</label>
+      <input type="password" id="set-pat" placeholder="github_pat_... or ghp_..." />
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button onclick="savePat()">Update PAT</button>
+        <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:var(--accent); font-size:12px; align-self:center;">create a new fine-grained PAT →</a>
+      </div>
     </div>
 
     <div class="section-break" style="margin:16px 0 10px 0;">Export / import</div>
@@ -617,7 +636,9 @@
 // =========================================================
 // Constants & state
 // =========================================================
-const JSONBLOB_API = 'https://jsonblob.com/api/jsonBlob';
+const GH_API = 'https://api.github.com';
+const GIST_FILENAME = 'rental-pricer.json';
+const GIST_DESC = 'rental-pricer shared data';
 const SESSION_KEY = 'rental-pricer-session';
 
 // State-level price/rent heuristics (rough US medians, 2025-ish)
@@ -652,7 +673,8 @@ const defaults = {
 };
 
 let state = {
-  listId: null,
+  gistId: null,
+  pat: null,
   passwordHash: null,
   properties: []
 };
@@ -681,36 +703,60 @@ function toast(msg, kind) {
 }
 
 // =========================================================
-// JSONBlob client
+// GitHub Gist client
 // =========================================================
-async function blobCreate(payload) {
-  const res = await fetch(JSONBLOB_API, {
+async function gistCreate(payload, pat) {
+  const body = {
+    description: GIST_DESC,
+    public: true,
+    files: { [GIST_FILENAME]: { content: JSON.stringify(payload, null, 2) } }
+  };
+  const res = await fetch(GH_API + '/gists', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload)
+    headers: {
+      'Authorization': 'Bearer ' + pat,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
   });
-  if (!res.ok) throw new Error('Create failed: ' + res.status);
-  const loc = res.headers.get('Location') || '';
-  const id = loc.split('/').pop();
-  if (!id) throw new Error('No ID returned');
-  return id;
+  if (!res.ok) {
+    const t = await res.text().catch(() => '');
+    throw new Error('Create failed (' + res.status + '): ' + t.slice(0, 200));
+  }
+  const data = await res.json();
+  return data.id;
 }
 
-async function blobGet(id) {
-  const res = await fetch(JSONBLOB_API + '/' + id, {
-    headers: { 'Accept': 'application/json' }
+async function gistGet(id) {
+  const res = await fetch(GH_API + '/gists/' + id, {
+    headers: { 'Accept': 'application/vnd.github+json' }
   });
   if (!res.ok) throw new Error('Fetch failed: ' + res.status);
-  return res.json();
+  const data = await res.json();
+  const file = data.files && data.files[GIST_FILENAME];
+  if (!file) throw new Error('Gist missing file: ' + GIST_FILENAME);
+  try { return JSON.parse(file.content); }
+  catch (e) { throw new Error('Gist content is not valid JSON'); }
 }
 
-async function blobPut(id, payload) {
-  const res = await fetch(JSONBLOB_API + '/' + id, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload)
+async function gistPatch(id, payload, pat) {
+  const body = {
+    files: { [GIST_FILENAME]: { content: JSON.stringify(payload, null, 2) } }
+  };
+  const res = await fetch(GH_API + '/gists/' + id, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': 'Bearer ' + pat,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
   });
-  if (!res.ok) throw new Error('Save failed: ' + res.status);
+  if (!res.ok) {
+    const t = await res.text().catch(() => '');
+    throw new Error('Save failed (' + res.status + '): ' + t.slice(0, 200));
+  }
 }
 
 // =========================================================
@@ -734,56 +780,60 @@ function gateError(msg) {
 async function createList() {
   gateError('');
   const pw = document.getElementById('create-password').value;
+  const pat = document.getElementById('create-pat').value.trim();
   if (!pw || pw.length < 3) return gateError('Password must be at least 3 characters.');
+  if (!pat) return gateError('Enter a GitHub PAT with gist permission.');
   try {
     const hash = await sha256(pw);
     const payload = { passwordHash: hash, properties: [] };
-    const id = await blobCreate(payload);
-    saveSession(id, pw);
-    location.hash = '#list=' + id;
-    state = { listId: id, passwordHash: hash, properties: [] };
+    const gistId = await gistCreate(payload, pat);
+    saveSession(gistId, pat, pw);
+    location.hash = buildHash(gistId, pat);
+    state = { gistId, pat, passwordHash: hash, properties: [] };
     enterApp();
     toast('New shared list created', 'success');
   } catch (e) {
-    gateError('Could not create list: ' + e.message);
+    gateError('Could not create gist: ' + e.message);
   }
 }
 
 async function joinList() {
   gateError('');
-  const id = document.getElementById('join-id').value.trim();
+  const raw = document.getElementById('join-link').value.trim();
   const pw = document.getElementById('join-password').value;
-  if (!id) return gateError('Enter a list ID.');
+  if (!raw) return gateError('Paste the share link.');
   if (!pw) return gateError('Enter the password.');
+  const { gist, t } = parseHashString(raw);
+  if (!gist) return gateError('Could not find a gist ID in that link.');
   try {
-    const data = await blobGet(id);
+    const data = await gistGet(gist);
     const hash = await sha256(pw);
     if (!data || data.passwordHash !== hash) return gateError('Wrong password.');
-    saveSession(id, pw);
-    location.hash = '#list=' + id;
-    state = { listId: id, passwordHash: hash, properties: data.properties || [] };
+    saveSession(gist, t, pw);
+    location.hash = buildHash(gist, t);
+    state = { gistId: gist, pat: t, passwordHash: hash, properties: data.properties || [] };
     enterApp();
     toast('Joined list', 'success');
   } catch (e) {
-    gateError('Could not load list: ' + e.message);
+    gateError('Could not load gist: ' + e.message);
   }
 }
 
 async function unlock() {
   gateError('');
-  const id = parseListIdFromHash();
+  const { gist, t } = parseHashParams();
   const pw = document.getElementById('unlock-password').value;
   if (!pw) return gateError('Enter the password.');
   try {
-    const data = await blobGet(id);
+    const data = await gistGet(gist);
     const hash = await sha256(pw);
     if (!data || data.passwordHash !== hash) return gateError('Wrong password.');
-    saveSession(id, pw);
-    state = { listId: id, passwordHash: hash, properties: data.properties || [] };
+    saveSession(gist, t, pw);
+    state = { gistId: gist, pat: t, passwordHash: hash, properties: data.properties || [] };
     enterApp();
     toast('Unlocked', 'success');
   } catch (e) {
-    gateError('Could not load list: ' + e.message);
+    gateError('Could not load gist: ' + e.message);
   }
 }
 
@@ -797,9 +847,9 @@ function resetGate() {
   gateError('');
 }
 
-function saveSession(id, pw) {
+function saveSession(gistId, pat, pw) {
   try {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id, pw }));
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ gistId, pat, pw }));
   } catch (e) {}
 }
 function loadSession() {
@@ -809,9 +859,20 @@ function loadSession() {
   } catch (e) { return null; }
 }
 
-function parseListIdFromHash() {
-  const m = (location.hash || '').match(/list=([A-Za-z0-9_-]+)/);
-  return m ? m[1] : null;
+function parseHashString(str) {
+  const idx = str.indexOf('#');
+  const h = idx >= 0 ? str.slice(idx + 1) : str;
+  const p = new URLSearchParams(h);
+  return { gist: p.get('gist') || '', t: p.get('t') || '' };
+}
+function parseHashParams() {
+  return parseHashString(location.hash || '');
+}
+function buildHash(gist, pat) {
+  const p = new URLSearchParams();
+  p.set('gist', gist);
+  if (pat) p.set('t', pat);
+  return '#' + p.toString();
 }
 
 // =========================================================
@@ -820,9 +881,11 @@ function parseListIdFromHash() {
 function enterApp() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = '';
-  document.getElementById('listId-display').textContent = state.listId;
-  document.getElementById('set-listId').value = state.listId;
+  const shortId = state.gistId ? state.gistId.slice(0, 10) + '…' : '—';
+  document.getElementById('listId-display').textContent = shortId;
+  document.getElementById('set-listId').value = state.gistId;
   document.getElementById('set-shareLink').value = buildShareLink();
+  document.getElementById('set-pat').value = state.pat || '';
   renderPropList();
   if (state.properties.length > 0) {
     loadProperty(state.properties[0].id);
@@ -838,7 +901,7 @@ function logout() {
 }
 
 function buildShareLink() {
-  return location.origin + location.pathname + '#list=' + state.listId;
+  return location.origin + location.pathname + buildHash(state.gistId, state.pat);
 }
 
 function copyShareLink() {
@@ -962,13 +1025,17 @@ async function deleteProperty() {
 }
 
 async function persistRemote() {
+  if (!state.pat) {
+    toast('No PAT configured — cannot save. Open Settings to add one.', 'error');
+    return;
+  }
   try {
-    await blobPut(state.listId, {
+    await gistPatch(state.gistId, {
       passwordHash: state.passwordHash,
       properties: state.properties
-    });
+    }, state.pat);
   } catch (e) {
-    toast('Save to shared list failed: ' + e.message, 'error');
+    toast('Save failed: ' + e.message, 'error');
   }
 }
 
@@ -1153,9 +1220,20 @@ function compute() {
 // Settings / export / import
 // =========================================================
 function openSettings() {
-  document.getElementById('set-listId').value = state.listId;
+  document.getElementById('set-listId').value = state.gistId;
   document.getElementById('set-shareLink').value = buildShareLink();
+  document.getElementById('set-pat').value = state.pat || '';
   document.getElementById('settings-modal').classList.add('open');
+}
+
+function savePat() {
+  const pat = document.getElementById('set-pat').value.trim();
+  if (!pat) return toast('PAT cannot be empty', 'error');
+  state.pat = pat;
+  saveSession(state.gistId, pat, (loadSession() || {}).pw);
+  location.hash = buildHash(state.gistId, pat);
+  document.getElementById('set-shareLink').value = buildShareLink();
+  toast('PAT updated', 'success');
 }
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('open');
@@ -1165,7 +1243,7 @@ function exportData() {
   const blob = new Blob([JSON.stringify(state.properties, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'rental-properties-' + state.listId + '.json';
+  a.download = 'rental-properties-' + state.gistId + '.json';
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -1191,7 +1269,7 @@ async function importData(evt) {
 }
 
 function leaveList() {
-  if (!confirm('Leave this list? Your local session will be cleared. The shared data remains on jsonblob for anyone else with the link.')) return;
+  if (!confirm('Leave this list? Your local session will be cleared. The shared gist remains on GitHub for anyone else with the link.')) return;
   sessionStorage.removeItem(SESSION_KEY);
   location.hash = '';
   location.reload();
@@ -1210,29 +1288,27 @@ document.querySelectorAll('.panel input, #paidOff').forEach(el => {
 // Bootstrap
 // =========================================================
 (async function init() {
-  const hashId = parseListIdFromHash();
+  const { gist, t } = parseHashParams();
   const session = loadSession();
 
-  if (hashId && session && session.id === hashId && session.pw) {
-    // Try auto-unlock from session
+  if (gist && session && session.gistId === gist && session.pw) {
     try {
-      const data = await blobGet(hashId);
+      const data = await gistGet(gist);
       const hash = await sha256(session.pw);
       if (data && data.passwordHash === hash) {
-        state = { listId: hashId, passwordHash: hash, properties: data.properties || [] };
+        state = { gistId: gist, pat: session.pat || t, passwordHash: hash, properties: data.properties || [] };
         enterApp();
         return;
       }
     } catch (e) { /* fall through to gate */ }
   }
 
-  if (hashId) {
-    // Show unlock prompt
+  if (gist) {
     document.getElementById('gate-create').style.display = 'none';
     document.getElementById('gate-join').style.display = 'none';
     document.getElementById('gate-tabs').style.display = 'none';
     document.getElementById('gate-unlock').style.display = '';
-    document.getElementById('gate-intro').textContent = 'Opening list ' + hashId.slice(0,8) + '…';
+    document.getElementById('gate-intro').textContent = 'Opening list ' + gist.slice(0,8) + '…';
     document.getElementById('unlock-password').focus();
   }
 })();
