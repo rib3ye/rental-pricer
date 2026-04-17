@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rental Report — 3002 Hillview Ave, Stockton CA 95207</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a2029;
+    --panel-2: #222a35;
+    --border: #2f3a47;
+    --text: #e6edf3;
+    --muted: #8b98a9;
+    --accent: #4ea1ff;
+    --good: #3ecf8e;
+    --bad: #ff6b6b;
+    --warn: #ffb454;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  h1 { margin: 0 0 4px 0; font-size: 24px; }
+  .sub { color: var(--muted); font-size: 14px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .panel h2 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+  .field {
+    display: grid;
+    grid-template-columns: 1fr 140px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .field label {
+    font-size: 14px;
+  }
+  .field .hint {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+  .field input[type="number"] {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: right;
+    width: 100%;
+    font-family: "SF Mono", Menlo, monospace;
+  }
+  .field input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .field .suffix {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+    align-items: center;
+  }
+  .field .suffix span {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .section-break {
+    border-top: 1px dashed var(--border);
+    margin: 16px 0 12px 0;
+    padding-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .metric {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+  }
+  .metric .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .metric .value {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 4px;
+    font-family: "SF Mono", Menlo, monospace;
+  }
+  .metric .value.good { color: var(--good); }
+  .metric .value.bad { color: var(--bad); }
+  .metric .sub-value {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .big-metric {
+    grid-column: 1 / -1;
+    padding: 16px;
+    text-align: center;
+  }
+  .big-metric .value { font-size: 28px; }
+  table.breakdown {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: "SF Mono", Menlo, monospace;
+  }
+  table.breakdown td {
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.breakdown td:last-child {
+    text-align: right;
+  }
+  table.breakdown tr.total td {
+    font-weight: 600;
+    border-top: 2px solid var(--border);
+    border-bottom: none;
+    padding-top: 10px;
+  }
+  table.breakdown tr.negative td:last-child {
+    color: var(--bad);
+  }
+  table.breakdown tr.positive td:last-child {
+    color: var(--good);
+  }
+  .caveats {
+    margin-top: 24px;
+  }
+  .caveats h2 {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .caveat-group {
+    margin-bottom: 18px;
+  }
+  .caveat-group h3 {
+    font-size: 14px;
+    margin: 0 0 6px 0;
+    color: var(--warn);
+  }
+  .caveat-group ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: #cbd5e0;
+  }
+  .caveat-group li {
+    margin-bottom: 4px;
+  }
+  .reset {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    float: right;
+  }
+  .reset:hover { border-color: var(--accent); }
+  .assumption-badge {
+    display: inline-block;
+    font-size: 10px;
+    background: var(--panel-2);
+    color: var(--muted);
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Rental Property Report</h1>
+    <div class="sub">3002 Hillview Ave, Stockton CA 95207 · Lincoln Village area · Report date: <span id="today"></span></div>
+  </header>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <div class="panel">
+      <h2>Inputs <button class="reset" onclick="resetDefaults()">Reset defaults</button></h2>
+
+      <div class="section-break">Property</div>
+      <div class="field">
+        <label>Purchase price<span class="hint">Best guess based on 95207 SFH comps, ~1,800 sqft, 3/2</span></label>
+        <div class="suffix"><input type="number" id="price" value="485000" /><span>$</span></div>
+      </div>
+      <div class="field">
+        <label>Estimated monthly market rent<span class="hint">Zillow/Rentometer typical for 3/2 in 95207</span></label>
+        <div class="suffix"><input type="number" id="rent" value="2450" /><span>$/mo</span></div>
+      </div>
+
+      <div class="section-break">Financing</div>
+      <div class="field">
+        <label>Property is paid off (no mortgage)<span class="hint">Check this if buying cash or analyzing an already-owned property</span></label>
+        <div class="suffix" style="grid-template-columns: 1fr;"><input type="checkbox" id="paidOff" style="width:auto; justify-self:end; transform:scale(1.3);" /></div>
+      </div>
+      <div class="field">
+        <label>Down payment</label>
+        <div class="suffix"><input type="number" id="downPct" value="25" step="0.5" /><span>%</span></div>
+      </div>
+      <div class="field">
+        <label>Mortgage rate<span class="hint">30yr conventional investment property, ~0.5–0.75% above owner-occupied</span></label>
+        <div class="suffix"><input type="number" id="rate" value="7.25" step="0.01" /><span>%</span></div>
+      </div>
+      <div class="field">
+        <label>Loan term</label>
+        <div class="suffix"><input type="number" id="term" value="30" /><span>yrs</span></div>
+      </div>
+      <div class="field">
+        <label>Closing costs<span class="hint">Loan origination, title, escrow, inspection</span></label>
+        <div class="suffix"><input type="number" id="closing" value="3" step="0.1" /><span>% of price</span></div>
+      </div>
+
+      <div class="section-break">Operating expenses (annual)</div>
+      <div class="field">
+        <label>Property tax<span class="hint">CA Prop 13: ~1.1% base + San Joaquin Co. assessments can push effective to ~1.25%</span></label>
+        <div class="suffix"><input type="number" id="taxPct" value="1.25" step="0.01" /><span>% of price</span></div>
+      </div>
+      <div class="field">
+        <label>Insurance (landlord/DP3)<span class="hint">Higher than homeowner; CA market tightening</span></label>
+        <div class="suffix"><input type="number" id="insurance" value="1800" /><span>$/yr</span></div>
+      </div>
+      <div class="field">
+        <label>HOA dues<span class="hint">Lincoln Village is mostly non-HOA; verify for this parcel</span></label>
+        <div class="suffix"><input type="number" id="hoa" value="0" /><span>$/mo</span></div>
+      </div>
+      <div class="field">
+        <label>Maintenance reserve<span class="hint">Rule of thumb: 1% of property value per year for ongoing repairs</span></label>
+        <div class="suffix"><input type="number" id="maintPct" value="1.0" step="0.1" /><span>% of price/yr</span></div>
+      </div>
+      <div class="field">
+        <label>CapEx reserve<span class="hint">Roof, HVAC, water heater, flooring — big-ticket replacements amortized</span></label>
+        <div class="suffix"><input type="number" id="capexPct" value="1.0" step="0.1" /><span>% of price/yr</span></div>
+      </div>
+      <div class="field">
+        <label>Vacancy<span class="hint">Stockton rental market vacancy historically ~5–8%</span></label>
+        <div class="suffix"><input type="number" id="vacancyPct" value="6" step="0.5" /><span>% of rent</span></div>
+      </div>
+      <div class="field">
+        <label>Property management<span class="hint">Typical 8–10% of collected rent; 0 if self-managing</span></label>
+        <div class="suffix"><input type="number" id="mgmtPct" value="8" step="0.5" /><span>% of rent</span></div>
+      </div>
+      <div class="field">
+        <label>Utilities paid by landlord<span class="hint">Usually tenant-paid for SFH; set >0 if you cover water/sewer/trash</span></label>
+        <div class="suffix"><input type="number" id="utilities" value="0" /><span>$/mo</span></div>
+      </div>
+      <div class="field">
+        <label>Leasing/turnover cost<span class="hint">Tenant-placement fee + turn costs, amortized</span></label>
+        <div class="suffix"><input type="number" id="leasing" value="600" /><span>$/yr</span></div>
+      </div>
+
+      <div class="section-break">Growth assumptions (for 5-yr projection)</div>
+      <div class="field">
+        <label>Annual rent growth</label>
+        <div class="suffix"><input type="number" id="rentGrowth" value="3.0" step="0.1" /><span>%</span></div>
+      </div>
+      <div class="field">
+        <label>Annual expense growth</label>
+        <div class="suffix"><input type="number" id="expGrowth" value="3.0" step="0.1" /><span>%</span></div>
+      </div>
+      <div class="field">
+        <label>Annual appreciation<span class="hint">Stockton 10-yr avg ~5–7%; volatile, don't count on it</span></label>
+        <div class="suffix"><input type="number" id="appreciation" value="3.5" step="0.1" /><span>%</span></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="panel">
+      <h2>Results</h2>
+
+      <div class="metrics">
+        <div class="metric big-metric">
+          <div class="label">Monthly cash flow (after all expenses & debt service)</div>
+          <div class="value" id="m-cashflow">—</div>
+          <div class="sub-value" id="m-cashflow-annual">—</div>
+        </div>
+
+        <div class="metric">
+          <div class="label">Cap rate<span class="assumption-badge">NOI / price</span></div>
+          <div class="value" id="m-cap">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Cash-on-cash return<span class="assumption-badge">yr 1</span></div>
+          <div class="value" id="m-coc">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Gross rent multiplier</div>
+          <div class="value" id="m-grm">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">1% rule (rent/price)</div>
+          <div class="value" id="m-1pct">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">DSCR<span class="assumption-badge">NOI / debt service</span></div>
+          <div class="value" id="m-dscr">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Total cash needed at close</div>
+          <div class="value" id="m-cash-needed">—</div>
+        </div>
+      </div>
+
+      <div class="section-break">Annual breakdown</div>
+      <table class="breakdown">
+        <tbody>
+          <tr><td>Gross scheduled rent</td><td id="b-gross">—</td></tr>
+          <tr class="negative"><td>– Vacancy loss</td><td id="b-vacancy">—</td></tr>
+          <tr class="positive"><td>= Effective gross income</td><td id="b-egi">—</td></tr>
+          <tr class="negative"><td>– Property tax</td><td id="b-tax">—</td></tr>
+          <tr class="negative"><td>– Insurance</td><td id="b-ins">—</td></tr>
+          <tr class="negative"><td>– HOA</td><td id="b-hoa">—</td></tr>
+          <tr class="negative"><td>– Maintenance</td><td id="b-maint">—</td></tr>
+          <tr class="negative"><td>– CapEx reserve</td><td id="b-capex">—</td></tr>
+          <tr class="negative"><td>– Property management</td><td id="b-mgmt">—</td></tr>
+          <tr class="negative"><td>– Utilities</td><td id="b-util">—</td></tr>
+          <tr class="negative"><td>– Leasing/turnover</td><td id="b-lease">—</td></tr>
+          <tr class="positive"><td>= Net operating income (NOI)</td><td id="b-noi">—</td></tr>
+          <tr class="negative"><td>– Debt service (P&I)</td><td id="b-debt">—</td></tr>
+          <tr class="total"><td>= Annual cash flow before tax</td><td id="b-cf">—</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-break">5-year projection</div>
+      <table class="breakdown" id="projection">
+        <thead>
+          <tr><td>Year</td><td>Rent</td><td>NOI</td><td>Cash flow</td><td>Home value</td></tr>
+        </thead>
+        <tbody id="proj-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="caveats panel" style="margin-top:24px;">
+    <h2>Caveats & externalities</h2>
+
+    <div class="caveat-group">
+      <h3>Value estimates are rough — verify before acting</h3>
+      <ul>
+        <li>Purchase price shown is a neighborhood midpoint guess for 95207 based on typical SFH comps. Pull actual comps (Redfin/Zillow/MLS) within 0.5 mi, past 90 days, same bed/bath/sqft.</li>
+        <li>Rent estimate assumes a 3BR/2BA SFH in typical condition. Verify via Rentometer, Zillow Rent Zestimate, and 5+ active listings of comparable units in 95207.</li>
+        <li>No interior condition data is factored in. Deferred maintenance can swing rent ±15% and CapEx needs dramatically.</li>
+        <li>This tool assumes a traditional long-term lease. Short-term/mid-term rental math is entirely different (higher gross, much higher expenses, regulatory risk).</li>
+      </ul>
+    </div>
+
+    <div class="caveat-group">
+      <h3>California / Stockton-specific risks</h3>
+      <ul>
+        <li><strong>AB 1482 (statewide rent cap):</strong> Likely applies if the property is >15 years old. Caps rent increases at 5% + CPI, max 10%/yr. Just-cause eviction rules apply.</li>
+        <li><strong>Stockton local ordinances:</strong> Stockton has had tenant-protection proposals; check current municipal code before underwriting aggressive rent growth.</li>
+        <li><strong>Prop 13 reassessment:</strong> Purchase triggers reassessment at sale price. Seller's current tax bill is NOT what you'll pay. Model at ~1.1–1.3% of your purchase price.</li>
+        <li><strong>Mello-Roos / special assessments:</strong> Some Stockton parcels carry CFD bonds adding $1,000–$4,000/yr. Pull the tax bill before closing.</li>
+        <li><strong>Insurance availability:</strong> CA homeowner/landlord insurance market is constrained. Several carriers have paused new policies. Get a binding quote early; FAIR Plan is backup but expensive and limited.</li>
+        <li><strong>Flood / levee risk:</strong> Stockton sits in the Delta. Check FEMA flood zone for this parcel; levee-protected areas may still require flood insurance or face reclassification.</li>
+        <li><strong>Seismic:</strong> Earthquake insurance is separate (CEA). Not included in baseline insurance figure.</li>
+        <li><strong>Property tax timing:</strong> CA taxes are due 12/10 and 4/10. Supplemental tax bill after purchase can catch new investors off guard.</li>
+      </ul>
+    </div>
+
+    <div class="caveat-group">
+      <h3>Operating cost blind spots</h3>
+      <ul>
+        <li><strong>Capital expenditures are lumpy:</strong> A $12k roof or $8k HVAC replacement hits in one year, not spread evenly. The CapEx reserve line smooths this on paper only.</li>
+        <li><strong>Eviction cost:</strong> A non-paying tenant in CA can take 3–6 months and $5k–$15k in legal/lost rent to remove. Not included.</li>
+        <li><strong>Bad-debt loss:</strong> Vacancy % covers empty units, not tenants who stop paying. Add 1–2% for realistic collection loss.</li>
+        <li><strong>Trash-out and make-ready:</strong> Post-eviction or heavy-use tenant turns can cost $3k–$10k+.</li>
+        <li><strong>Landlord insurance deductibles:</strong> Often $2,500–$5,000. Small claims come out of pocket.</li>
+        <li><strong>Utilities during vacancy:</strong> You pay water/gas/electric minimums when no tenant is in place.</li>
+      </ul>
+    </div>
+
+    <div class="caveat-group">
+      <h3>Financing & transaction caveats</h3>
+      <ul>
+        <li>Investment-property loans require 20–25% down minimum, price in 0.5–0.75% rate premium vs. owner-occupied, and have stricter DTI/reserve requirements.</li>
+        <li>Closing cost estimate excludes prepaid tax/insurance impounds — those add 2–6 months of each at closing.</li>
+        <li>If buying in an LLC, expect commercial-loan terms (higher rate, shorter amortization, balloon) instead of 30-yr fixed.</li>
+        <li>Depreciation (27.5-yr SL on building basis) is not modeled here but materially improves after-tax returns.</li>
+        <li>This tool shows pre-tax cash flow. Your actual after-tax return depends on your marginal rate, depreciation, passive-loss rules, and whether you qualify as a real estate professional.</li>
+      </ul>
+    </div>
+
+    <div class="caveat-group">
+      <h3>Market & macro risks</h3>
+      <ul>
+        <li><strong>Stockton was the epicenter of the 2008 crash</strong> — prices fell ~65%. The market can be volatile. Don't underwrite to aggressive appreciation.</li>
+        <li>Central Valley rents track Bay Area commuter demand and Amazon/logistics employment. Remote-work unwind and warehouse-sector softness can compress rents.</li>
+        <li>Interest-rate environment affects both your refinance optionality and future exit cap rates.</li>
+        <li>Property taxes grow at Prop 13's 2%/yr cap for the assessed value, but insurance and maintenance can grow faster than rent in any given year.</li>
+      </ul>
+    </div>
+
+    <div class="caveat-group">
+      <h3>What this report does NOT include</h3>
+      <ul>
+        <li>Formal inspection, appraisal, title search, or survey.</li>
+        <li>Environmental review (underground tanks, lead paint for pre-1978, asbestos, radon, meth contamination).</li>
+        <li>Rent-control status verification for this specific parcel.</li>
+        <li>School district quality, crime stats, walk scores, or neighborhood trajectory — all of which affect tenant quality and long-term rent growth.</li>
+        <li>Legal/tax advice. Consult a CA real estate attorney and CPA before purchasing.</li>
+      </ul>
+    </div>
+
+    <div class="caveat-group">
+      <h3>Data sources to verify before acting on this report</h3>
+      <ul>
+        <li>Comparable sales: Redfin, Zillow, MLS (via agent), PropertyRadar</li>
+        <li>Comparable rents: Zillow Rent Zestimate, Rentometer, Apartments.com, Craigslist active listings</li>
+        <li>Tax bill: San Joaquin County Assessor-Recorder (sjgov.org)</li>
+        <li>Flood zone: FEMA Flood Map Service Center (msc.fema.gov)</li>
+        <li>Rent law: CA Dept. of Real Estate + local Stockton municipal code</li>
+        <li>Insurance quote: Get a real bind from a CA-admitted carrier; don't rely on national averages</li>
+      </ul>
+    </div>
+
+    <div class="caveat-group" style="border-top:1px solid var(--border); padding-top:12px;">
+      <h3 style="color:var(--muted)">Disclaimer</h3>
+      <ul style="color:var(--muted); font-size:12px;">
+        <li>All figures are estimates generated from publicly-available rules of thumb and default assumptions. No address-specific data was retrieved. This is not an appraisal, investment recommendation, or offer. Independently verify every number before making a financial decision.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const defaults = {
+    price: 485000, rent: 2450,
+    downPct: 25, rate: 7.25, term: 30, closing: 3,
+    taxPct: 1.25, insurance: 1800, hoa: 0,
+    maintPct: 1.0, capexPct: 1.0, vacancyPct: 6, mgmtPct: 8,
+    utilities: 0, leasing: 600,
+    rentGrowth: 3.0, expGrowth: 3.0, appreciation: 3.5
+  };
+
+  const fmt$ = n => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString();
+  const fmtPct = n => (n).toFixed(2) + '%';
+  const fmtNum = n => n.toFixed(2);
+
+  function getInputs() {
+    const o = {};
+    for (const k of Object.keys(defaults)) {
+      const el = document.getElementById(k);
+      o[k] = parseFloat(el.value) || 0;
+    }
+    return o;
+  }
+
+  function mortgagePayment(principal, annualRatePct, years) {
+    if (principal <= 0) return 0;
+    const r = (annualRatePct / 100) / 12;
+    const n = years * 12;
+    if (r === 0) return principal / n;
+    return principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  }
+
+  function compute() {
+    const i = getInputs();
+    const paidOff = document.getElementById('paidOff').checked;
+
+    // Disable financing fields visually when paid off
+    ['downPct','rate','term'].forEach(id => {
+      document.getElementById(id).disabled = paidOff;
+      document.getElementById(id).style.opacity = paidOff ? 0.4 : 1;
+    });
+
+    const downPayment = paidOff ? i.price : i.price * i.downPct / 100;
+    const loanAmount = paidOff ? 0 : i.price - downPayment;
+    const closingCosts = i.price * i.closing / 100;
+    const cashNeeded = paidOff ? (i.price + closingCosts) : (downPayment + closingCosts);
+
+    const monthlyPI = paidOff ? 0 : mortgagePayment(loanAmount, i.rate, i.term);
+    const annualDebtService = monthlyPI * 12;
+
+    const grossRent = i.rent * 12;
+    const vacancy = grossRent * i.vacancyPct / 100;
+    const egi = grossRent - vacancy;
+
+    const tax = i.price * i.taxPct / 100;
+    const hoa = i.hoa * 12;
+    const maint = i.price * i.maintPct / 100;
+    const capex = i.price * i.capexPct / 100;
+    const mgmt = grossRent * i.mgmtPct / 100;
+    const util = i.utilities * 12;
+
+    const opex = tax + i.insurance + hoa + maint + capex + mgmt + util + i.leasing;
+    const noi = egi - opex;
+    const annualCashFlow = noi - annualDebtService;
+    const monthlyCashFlow = annualCashFlow / 12;
+
+    const capRate = (noi / i.price) * 100;
+    const coc = (annualCashFlow / cashNeeded) * 100;
+    const grm = i.price / grossRent;
+    const onePct = (i.rent / i.price) * 100;
+    const dscr = annualDebtService > 0 ? noi / annualDebtService : Infinity;
+
+    // Render metrics
+    const cfEl = document.getElementById('m-cashflow');
+    cfEl.textContent = fmt$(monthlyCashFlow) + '/mo';
+    cfEl.className = 'value ' + (monthlyCashFlow >= 0 ? 'good' : 'bad');
+    document.getElementById('m-cashflow-annual').textContent = fmt$(annualCashFlow) + '/yr';
+
+    const capEl = document.getElementById('m-cap');
+    capEl.textContent = fmtPct(capRate);
+    capEl.className = 'value ' + (capRate >= 5 ? 'good' : '');
+
+    const cocEl = document.getElementById('m-coc');
+    cocEl.textContent = fmtPct(coc);
+    cocEl.className = 'value ' + (coc >= 6 ? 'good' : coc < 0 ? 'bad' : '');
+
+    document.getElementById('m-grm').textContent = fmtNum(grm);
+    document.getElementById('m-1pct').textContent = fmtPct(onePct) + ' (target ≥1%)';
+
+    const dscrEl = document.getElementById('m-dscr');
+    dscrEl.textContent = isFinite(dscr) ? fmtNum(dscr) : '∞';
+    dscrEl.className = 'value ' + (dscr >= 1.25 ? 'good' : dscr < 1 ? 'bad' : '');
+
+    document.getElementById('m-cash-needed').textContent = fmt$(cashNeeded);
+
+    // Breakdown
+    document.getElementById('b-gross').textContent = fmt$(grossRent);
+    document.getElementById('b-vacancy').textContent = fmt$(-vacancy);
+    document.getElementById('b-egi').textContent = fmt$(egi);
+    document.getElementById('b-tax').textContent = fmt$(-tax);
+    document.getElementById('b-ins').textContent = fmt$(-i.insurance);
+    document.getElementById('b-hoa').textContent = fmt$(-hoa);
+    document.getElementById('b-maint').textContent = fmt$(-maint);
+    document.getElementById('b-capex').textContent = fmt$(-capex);
+    document.getElementById('b-mgmt').textContent = fmt$(-mgmt);
+    document.getElementById('b-util').textContent = fmt$(-util);
+    document.getElementById('b-lease').textContent = fmt$(-i.leasing);
+    document.getElementById('b-noi').textContent = fmt$(noi);
+    document.getElementById('b-debt').textContent = fmt$(-annualDebtService);
+    document.getElementById('b-cf').textContent = fmt$(annualCashFlow);
+
+    // 5-yr projection
+    const body = document.getElementById('proj-body');
+    body.innerHTML = '';
+    let rentY = grossRent, opexY = opex, valY = i.price;
+    for (let y = 1; y <= 5; y++) {
+      if (y > 1) {
+        rentY *= (1 + i.rentGrowth / 100);
+        opexY *= (1 + i.expGrowth / 100);
+        valY *= (1 + i.appreciation / 100);
+      }
+      const vacY = rentY * i.vacancyPct / 100;
+      // opex scales with expGrowth only on fixed items; mgmt scales with rent; simplified here
+      const noiY = rentY - vacY - opexY;
+      const cfY = noiY - annualDebtService;
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>Year ${y}</td><td>${fmt$(rentY)}</td><td>${fmt$(noiY)}</td><td>${fmt$(cfY)}</td><td>${fmt$(valY)}</td>`;
+      body.appendChild(row);
+    }
+  }
+
+  const STORAGE_KEY = 'rental-pricer-3002-hillview';
+
+  function saveState() {
+    const state = {};
+    for (const k of Object.keys(defaults)) {
+      state[k] = document.getElementById(k).value;
+    }
+    state.paidOff = document.getElementById('paidOff').checked;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      for (const k of Object.keys(defaults)) {
+        if (state[k] !== undefined) document.getElementById(k).value = state[k];
+      }
+      if (state.paidOff !== undefined) document.getElementById('paidOff').checked = state.paidOff;
+    } catch (e) {}
+  }
+
+  function resetDefaults() {
+    for (const k of Object.keys(defaults)) {
+      document.getElementById(k).value = defaults[k];
+    }
+    document.getElementById('paidOff').checked = false;
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    compute();
+  }
+
+  document.querySelectorAll('input').forEach(el => {
+    el.addEventListener('input', () => { compute(); saveState(); });
+    el.addEventListener('change', () => { compute(); saveState(); });
+  });
+
+  document.getElementById('today').textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  loadState();
+  compute();
+</script>
+</body>
+</html>
