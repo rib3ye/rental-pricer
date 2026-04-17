@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rental Pricer — Shared Properties</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a2029;
+    --panel-2: #222a35;
+    --border: #2f3a47;
+    --text: #e6edf3;
+    --muted: #8b98a9;
+    --accent: #4ea1ff;
+    --good: #3ecf8e;
+    --bad: #ff6b6b;
+    --warn: #ffb454;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+  button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    color: #0b1220;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  button.primary:hover { filter: brightness(1.1); }
+  button.danger { color: var(--bad); }
+  button.danger:hover { border-color: var(--bad); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  input[type="text"], input[type="password"], input[type="number"] {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+
+  /* Gate / setup overlay */
+  #gate {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .gate-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
+    max-width: 480px;
+    width: 100%;
+  }
+  .gate-card h1 { margin: 0 0 8px 0; font-size: 22px; }
+  .gate-card p { color: var(--muted); font-size: 14px; margin: 0 0 16px 0; }
+  .gate-card .tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
+  }
+  .gate-card .tab {
+    padding: 8px; text-align: center; border: 1px solid var(--border);
+    border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .gate-card .tab.active { background: var(--panel-2); border-color: var(--accent); }
+  .gate-card .row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .gate-card label { font-size: 12px; color: var(--muted); }
+  .gate-card input { width: 100%; }
+  .gate-card .actions { display: flex; gap: 8px; margin-top: 6px; }
+  .gate-card .error { color: var(--bad); font-size: 13px; margin-top: 8px; }
+
+  /* Main layout */
+  #app { display: none; }
+  header.top {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+  }
+  header.top h1 { margin: 0; font-size: 18px; }
+  header.top .meta {
+    color: var(--muted); font-size: 12px; font-family: "SF Mono", Menlo, monospace;
+  }
+  header.top .actions { display: flex; gap: 8px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 57px);
+  }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  aside.sidebar {
+    background: #141a22;
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+  }
+  aside.sidebar h2 {
+    margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--muted);
+  }
+  aside.sidebar .new-btn { width: 100%; margin-bottom: 12px; }
+  .prop-list { list-style: none; margin: 0; padding: 0; }
+  .prop-list li {
+    padding: 10px; border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 6px; cursor: pointer; font-size: 13px;
+  }
+  .prop-list li.active {
+    background: var(--panel-2); border-color: var(--accent);
+  }
+  .prop-list li:hover { background: var(--panel-2); }
+  .prop-list .name { font-weight: 600; }
+  .prop-list .addr { color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .prop-list .cf { font-size: 11px; margin-top: 4px; font-family: "SF Mono", Menlo, monospace; }
+
+  main.content {
+    padding: 20px;
+    overflow-y: auto;
+    max-width: 1200px;
+    width: 100%;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .panel h2 {
+    margin: 0 0 16px 0; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted);
+  }
+  .panel-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .inputs-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  @media (max-width: 700px) { .inputs-grid { grid-template-columns: 1fr; } }
+
+  .field {
+    display: grid;
+    grid-template-columns: 1fr 140px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .field label { font-size: 13px; }
+  .field .hint { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
+  .field input[type="number"] { text-align: right; width: 100%; font-family: "SF Mono", Menlo, monospace; }
+  .field .suffix { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; }
+  .field .suffix span { color: var(--muted); font-size: 12px; }
+
+  .section-break {
+    border-top: 1px dashed var(--border);
+    margin: 16px 0 12px 0;
+    padding-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .metric {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px;
+  }
+  .metric .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric .value { font-size: 20px; font-weight: 600; margin-top: 4px; font-family: "SF Mono", Menlo, monospace; }
+  .metric .value.good { color: var(--good); }
+  .metric .value.bad { color: var(--bad); }
+  .metric .sub-value { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .big-metric { grid-column: 1 / -1; padding: 16px; text-align: center; }
+  .big-metric .value { font-size: 26px; }
+
+  table.breakdown { width: 100%; border-collapse: collapse; font-size: 13px; font-family: "SF Mono", Menlo, monospace; }
+  table.breakdown td { padding: 6px 4px; border-bottom: 1px solid var(--border); }
+  table.breakdown td:last-child { text-align: right; }
+  table.breakdown tr.total td { font-weight: 600; border-top: 2px solid var(--border); border-bottom: none; padding-top: 10px; }
+  table.breakdown tr.negative td:last-child { color: var(--bad); }
+  table.breakdown tr.positive td:last-child { color: var(--good); }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center; z-index: 90;
+    padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 24px; max-width: 520px; width: 100%; }
+  .modal h2 { margin: 0 0 16px 0; font-size: 18px; }
+  .modal .row { margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .modal label { font-size: 12px; color: var(--muted); }
+  .modal input { width: 100%; }
+  .modal .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--panel-2); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 6px; font-size: 13px;
+    display: none; z-index: 200;
+  }
+  #toast.show { display: block; }
+  #toast.error { border-color: var(--bad); }
+  #toast.success { border-color: var(--good); }
+
+  .caveats { font-size: 13px; color: #cbd5e0; }
+  .caveats h3 { font-size: 13px; margin: 16px 0 6px 0; color: var(--warn); }
+  .caveats ul { margin: 0 0 10px 20px; padding: 0; }
+  .caveats li { margin-bottom: 3px; }
+
+  .address-bar { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+  @media (max-width: 600px) { .address-bar { grid-template-columns: 1fr; } }
+
+  .copy-link { font-size: 11px; color: var(--accent); cursor: pointer; text-decoration: underline; }
+
+  .assumption-badge {
+    display: inline-block; font-size: 10px; background: var(--panel-2);
+    color: var(--muted); padding: 1px 6px; border-radius: 10px; margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ GATE ============ -->
+<div id="gate">
+  <div class="gate-card">
+    <h1>Rental Pricer</h1>
+    <p id="gate-intro">Shared property analysis. Choose how to get started.</p>
+
+    <div class="tabs" id="gate-tabs">
+      <div class="tab active" data-mode="create">Create new list</div>
+      <div class="tab" data-mode="join">Join existing</div>
+    </div>
+
+    <div id="gate-create">
+      <div class="row">
+        <label>Set a password for this shared list</label>
+        <input type="password" id="create-password" placeholder="Anyone with the link will need this" />
+      </div>
+      <div class="actions">
+        <button class="primary" onclick="createList()">Create list</button>
+      </div>
+    </div>
+
+    <div id="gate-join" style="display:none;">
+      <div class="row">
+        <label>List ID</label>
+        <input type="text" id="join-id" placeholder="e.g. 1234567890abcdef..." />
+      </div>
+      <div class="row">
+        <label>Password</label>
+        <input type="password" id="join-password" />
+      </div>
+      <div class="actions">
+        <button class="primary" onclick="joinList()">Open list</button>
+      </div>
+    </div>
+
+    <div id="gate-unlock" style="display:none;">
+      <div class="row">
+        <label>Enter the password for this list</label>
+        <input type="password" id="unlock-password" autofocus />
+      </div>
+      <div class="actions">
+        <button class="primary" onclick="unlock()">Unlock</button>
+        <button onclick="resetGate()">Switch list</button>
+      </div>
+    </div>
+
+    <div class="error" id="gate-error"></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <header class="top">
+    <div>
+      <h1>Rental Pricer</h1>
+      <div class="meta">
+        List: <span id="listId-display">—</span>
+        · <span class="copy-link" onclick="copyShareLink()">copy share link</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button onclick="openSettings()">Settings</button>
+      <button onclick="logout()">Lock</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Saved properties</h2>
+      <button class="primary new-btn" onclick="newProperty()">+ New property</button>
+      <ul class="prop-list" id="propList"></ul>
+    </aside>
+
+    <main class="content">
+
+      <!-- PROPERTY HEADER -->
+      <div class="panel">
+        <h2>Property</h2>
+        <div class="field">
+          <label>Nickname</label>
+          <div class="suffix" style="grid-template-columns: 1fr;">
+            <input type="text" id="p-name" placeholder="My rental on Hillview" style="width:100%;" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Address</label>
+          <div class="suffix" style="grid-template-columns: 1fr;">
+            <input type="text" id="p-address" placeholder="123 Main St, City, ST 12345" style="width:100%;" />
+          </div>
+        </div>
+        <div class="address-bar" style="margin-top: 10px;">
+          <div></div>
+          <button onclick="lookupAddress()">Lookup estimates</button>
+          <div style="display:flex; gap:8px;">
+            <button class="primary" onclick="saveProperty()">Save</button>
+            <button class="danger" onclick="deleteProperty()" id="delete-btn" style="display:none;">Delete</button>
+          </div>
+        </div>
+        <div class="meta" id="lookup-note" style="font-size:11px; color:var(--muted); margin-top:8px;"></div>
+      </div>
+
+      <!-- INPUTS -->
+      <div class="panel">
+        <h2>Inputs</h2>
+        <div class="inputs-grid">
+          <div>
+            <div class="section-break">Property</div>
+            <div class="field">
+              <label>Purchase price</label>
+              <div class="suffix"><input type="number" id="price" value="485000" /><span>$</span></div>
+            </div>
+            <div class="field">
+              <label>Monthly market rent</label>
+              <div class="suffix"><input type="number" id="rent" value="2450" /><span>$/mo</span></div>
+            </div>
+
+            <div class="section-break">Financing</div>
+            <div class="field">
+              <label>Property is paid off (no mortgage)</label>
+              <div class="suffix" style="grid-template-columns: 1fr;">
+                <input type="checkbox" id="paidOff" style="width:auto; justify-self:end; transform:scale(1.3);" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Down payment</label>
+              <div class="suffix"><input type="number" id="downPct" value="25" step="0.5" /><span>%</span></div>
+            </div>
+            <div class="field">
+              <label>Mortgage rate</label>
+              <div class="suffix"><input type="number" id="rate" value="7.25" step="0.01" /><span>%</span></div>
+            </div>
+            <div class="field">
+              <label>Loan term</label>
+              <div class="suffix"><input type="number" id="term" value="30" /><span>yrs</span></div>
+            </div>
+            <div class="field">
+              <label>Closing costs</label>
+              <div class="suffix"><input type="number" id="closing" value="3" step="0.1" /><span>% of price</span></div>
+            </div>
+
+            <div class="section-break">Growth assumptions</div>
+            <div class="field">
+              <label>Rent growth</label>
+              <div class="suffix"><input type="number" id="rentGrowth" value="3.0" step="0.1" /><span>%/yr</span></div>
+            </div>
+            <div class="field">
+              <label>Expense growth</label>
+              <div class="suffix"><input type="number" id="expGrowth" value="3.0" step="0.1" /><span>%/yr</span></div>
+            </div>
+            <div class="field">
+              <label>Appreciation</label>
+              <div class="suffix"><input type="number" id="appreciation" value="3.5" step="0.1" /><span>%/yr</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-break">Operating expenses</div>
+            <div class="field">
+              <label>Property tax<span class="hint">Verify actual rate for jurisdiction</span></label>
+              <div class="suffix"><input type="number" id="taxPct" value="1.25" step="0.01" /><span>% of price/yr</span></div>
+            </div>
+            <div class="field">
+              <label>Insurance (landlord)</label>
+              <div class="suffix"><input type="number" id="insurance" value="1800" /><span>$/yr</span></div>
+            </div>
+            <div class="field">
+              <label>HOA dues</label>
+              <div class="suffix"><input type="number" id="hoa" value="0" /><span>$/mo</span></div>
+            </div>
+            <div class="field">
+              <label>Maintenance<span class="hint">Rule of thumb: 1%/yr of value</span></label>
+              <div class="suffix"><input type="number" id="maintPct" value="1.0" step="0.1" /><span>% of price/yr</span></div>
+            </div>
+            <div class="field">
+              <label>CapEx reserve<span class="hint">Big-ticket replacements amortized</span></label>
+              <div class="suffix"><input type="number" id="capexPct" value="1.0" step="0.1" /><span>% of price/yr</span></div>
+            </div>
+            <div class="field">
+              <label>Vacancy</label>
+              <div class="suffix"><input type="number" id="vacancyPct" value="6" step="0.5" /><span>% of rent</span></div>
+            </div>
+            <div class="field">
+              <label>Property management</label>
+              <div class="suffix"><input type="number" id="mgmtPct" value="8" step="0.5" /><span>% of rent</span></div>
+            </div>
+            <div class="field">
+              <label>Landlord-paid utilities</label>
+              <div class="suffix"><input type="number" id="utilities" value="0" /><span>$/mo</span></div>
+            </div>
+            <div class="field">
+              <label>Leasing/turnover</label>
+              <div class="suffix"><input type="number" id="leasing" value="600" /><span>$/yr</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="panel">
+        <h2>Results</h2>
+        <div class="metrics">
+          <div class="metric big-metric">
+            <div class="label">Monthly cash flow</div>
+            <div class="value" id="m-cashflow">—</div>
+            <div class="sub-value" id="m-cashflow-annual">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Cap rate<span class="assumption-badge">NOI / price</span></div>
+            <div class="value" id="m-cap">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Cash-on-cash<span class="assumption-badge">yr 1</span></div>
+            <div class="value" id="m-coc">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Gross rent multiplier</div>
+            <div class="value" id="m-grm">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">1% rule</div>
+            <div class="value" id="m-1pct">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">DSCR</div>
+            <div class="value" id="m-dscr">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Cash needed at close</div>
+            <div class="value" id="m-cash-needed">—</div>
+          </div>
+        </div>
+
+        <div class="section-break">Annual breakdown</div>
+        <table class="breakdown">
+          <tbody>
+            <tr><td>Gross scheduled rent</td><td id="b-gross">—</td></tr>
+            <tr class="negative"><td>– Vacancy loss</td><td id="b-vacancy">—</td></tr>
+            <tr class="positive"><td>= Effective gross income</td><td id="b-egi">—</td></tr>
+            <tr class="negative"><td>– Property tax</td><td id="b-tax">—</td></tr>
+            <tr class="negative"><td>– Insurance</td><td id="b-ins">—</td></tr>
+            <tr class="negative"><td>– HOA</td><td id="b-hoa">—</td></tr>
+            <tr class="negative"><td>– Maintenance</td><td id="b-maint">—</td></tr>
+            <tr class="negative"><td>– CapEx reserve</td><td id="b-capex">—</td></tr>
+            <tr class="negative"><td>– Property management</td><td id="b-mgmt">—</td></tr>
+            <tr class="negative"><td>– Utilities</td><td id="b-util">—</td></tr>
+            <tr class="negative"><td>– Leasing/turnover</td><td id="b-lease">—</td></tr>
+            <tr class="positive"><td>= Net operating income</td><td id="b-noi">—</td></tr>
+            <tr class="negative"><td>– Debt service</td><td id="b-debt">—</td></tr>
+            <tr class="total"><td>= Annual cash flow</td><td id="b-cf">—</td></tr>
+          </tbody>
+        </table>
+
+        <div class="section-break">5-year projection</div>
+        <table class="breakdown">
+          <thead><tr><td>Year</td><td>Rent</td><td>NOI</td><td>Cash flow</td><td>Value</td></tr></thead>
+          <tbody id="proj-body"></tbody>
+        </table>
+      </div>
+
+      <!-- CAVEATS -->
+      <div class="panel caveats">
+        <h2>Caveats & externalities</h2>
+
+        <h3>Estimates are rough — verify before acting</h3>
+        <ul>
+          <li>Auto-lookup uses state-level heuristics, not address-specific comps. Always verify purchase price against recent comps within 0.5 mi and rent against active listings of comparable units.</li>
+          <li>Interior condition is not factored in. Deferred maintenance can swing rent ±15% and CapEx needs dramatically.</li>
+          <li>This tool assumes long-term leases. Short-term/mid-term rental math (STR/MTR) is entirely different — higher gross, much higher expenses, regulatory risk.</li>
+        </ul>
+
+        <h3>Tax, insurance & regulatory</h3>
+        <ul>
+          <li><strong>Property tax reassessment:</strong> In many states (CA especially via Prop 13), sale triggers reassessment. Seller's current tax bill is NOT what you'll pay.</li>
+          <li><strong>Special assessments:</strong> Mello-Roos (CA), CDD fees (FL), PIDs (TX), and similar bonds can add $1k–$4k+/yr on top of base property tax. Pull the full tax bill before closing.</li>
+          <li><strong>Insurance market:</strong> In CA, FL, LA, and parts of TX, carriers have paused new policies or priced coverage aggressively. Get a binding quote early; state-run insurers of last resort are expensive and limited.</li>
+          <li><strong>Flood/wildfire:</strong> Check FEMA flood zone (msc.fema.gov) and wildfire risk. Additional policies may be required or prudent.</li>
+          <li><strong>Rent control / just-cause eviction:</strong> CA AB 1482, OR SB 608, NY HSTPA, many cities. Verify whether the property is covered; it caps rent growth and restricts terminations.</li>
+        </ul>
+
+        <h3>Operating cost blind spots</h3>
+        <ul>
+          <li><strong>CapEx is lumpy:</strong> A $12k roof or $8k HVAC hits in one year. The reserve line smooths it on paper only.</li>
+          <li><strong>Eviction cost:</strong> A non-paying tenant can take 3–9 months and $5k–$15k in legal/lost rent to remove. Not modeled.</li>
+          <li><strong>Bad-debt loss:</strong> Vacancy % covers empty units, not tenants who stop paying. Add 1–2% for realistic collection loss.</li>
+          <li><strong>Make-ready/turnover:</strong> Heavy-use or post-eviction turns can cost $3k–$10k+.</li>
+          <li><strong>Insurance deductibles:</strong> Often $2.5k–$5k. Small claims come out of pocket.</li>
+          <li><strong>Utilities during vacancy:</strong> Water/gas/electric minimums are your expense when no tenant is in place.</li>
+        </ul>
+
+        <h3>Financing caveats</h3>
+        <ul>
+          <li>Investment-property loans typically require 20–25% down, price a 0.5–0.75% rate premium vs. owner-occupied, and have stricter DTI + reserve requirements.</li>
+          <li>Closing cost estimate excludes prepaid tax/insurance impounds — those add 2–6 months of each at closing.</li>
+          <li>LLC purchases usually require commercial-loan terms (higher rate, shorter amortization, balloon) instead of 30-yr fixed.</li>
+          <li>Depreciation (27.5-yr SL on building basis) is not modeled here but materially improves after-tax returns.</li>
+          <li>This tool shows pre-tax cash flow. Actual after-tax return depends on marginal rate, depreciation, passive-loss rules, and real-estate-professional status.</li>
+        </ul>
+
+        <h3>Market & macro risks</h3>
+        <ul>
+          <li>Property taxes in non-Prop-13 states reassess annually with market value — a boom can blow up your underwriting.</li>
+          <li>Insurance and maintenance can grow faster than rent in any given year, compressing cash flow.</li>
+          <li>Interest-rate environment affects refinance optionality and future exit cap rates.</li>
+          <li>Single-property concentration risk: one bad tenant, one roof failure, one local market downturn can erase years of returns.</li>
+        </ul>
+
+        <h3>What this report does NOT include</h3>
+        <ul>
+          <li>Formal inspection, appraisal, title search, or survey.</li>
+          <li>Environmental review (UGTs, lead paint for pre-1978, asbestos, radon, meth contamination).</li>
+          <li>Rent-control status verification for the specific parcel.</li>
+          <li>School district quality, crime stats, walk scores, neighborhood trajectory.</li>
+          <li>Legal/tax advice. Consult a local real estate attorney and CPA.</li>
+        </ul>
+
+        <h3>Security notes on this tool</h3>
+        <ul>
+          <li>The password gate is client-side only. Anyone with browser dev tools can read the stored data. Do not store sensitive PII here.</li>
+          <li>Shared storage uses jsonblob.com — a free public JSON service. The list is technically accessible to anyone who knows or guesses the blob ID. The password is only local UI protection.</li>
+          <li>jsonblob may go offline or purge unused blobs. Do not treat this as authoritative storage. Keep a local copy of important data (see Settings → Export).</li>
+        </ul>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal">
+    <h2>Settings</h2>
+
+    <div class="row">
+      <label>Shared list ID</label>
+      <input type="text" id="set-listId" readonly />
+    </div>
+    <div class="row">
+      <label>Share link</label>
+      <input type="text" id="set-shareLink" readonly />
+    </div>
+
+    <div class="section-break" style="margin:16px 0 10px 0;">Export / import</div>
+    <div class="row">
+      <div style="display:flex; gap:8px;">
+        <button onclick="exportData()">Export JSON</button>
+        <button onclick="document.getElementById('import-file').click()">Import JSON</button>
+        <input type="file" id="import-file" accept="application/json" style="display:none;" onchange="importData(event)" />
+      </div>
+    </div>
+
+    <div class="section-break" style="margin:16px 0 10px 0;">Danger zone</div>
+    <div class="row">
+      <button class="danger" onclick="leaveList()">Leave this list (clear local session)</button>
+    </div>
+
+    <div class="actions">
+      <button onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast"></div>
+
+<script>
+// =========================================================
+// Constants & state
+// =========================================================
+const JSONBLOB_API = 'https://jsonblob.com/api/jsonBlob';
+const SESSION_KEY = 'rental-pricer-session';
+
+// State-level price/rent heuristics (rough US medians, 2025-ish)
+const STATE_HEURISTICS = {
+  AL:{p:240000,r:1500}, AK:{p:360000,r:1900}, AZ:{p:430000,r:2200},
+  AR:{p:220000,r:1400}, CA:{p:760000,r:2900}, CO:{p:560000,r:2400},
+  CT:{p:400000,r:2300}, DE:{p:360000,r:1900}, FL:{p:410000,r:2400},
+  GA:{p:330000,r:2000}, HI:{p:850000,r:3200}, ID:{p:440000,r:1900},
+  IL:{p:270000,r:1900}, IN:{p:230000,r:1500}, IA:{p:220000,r:1400},
+  KS:{p:230000,r:1500}, KY:{p:210000,r:1400}, LA:{p:230000,r:1500},
+  ME:{p:380000,r:1900}, MD:{p:410000,r:2200}, MA:{p:600000,r:2800},
+  MI:{p:240000,r:1600}, MN:{p:340000,r:1900}, MS:{p:190000,r:1300},
+  MO:{p:240000,r:1500}, MT:{p:450000,r:1900}, NE:{p:260000,r:1500},
+  NV:{p:440000,r:2100}, NH:{p:470000,r:2200}, NJ:{p:500000,r:2500},
+  NM:{p:300000,r:1600}, NY:{p:450000,r:2700}, NC:{p:340000,r:1900},
+  ND:{p:260000,r:1400}, OH:{p:230000,r:1500}, OK:{p:210000,r:1400},
+  OR:{p:490000,r:2200}, PA:{p:270000,r:1700}, RI:{p:450000,r:2200},
+  SC:{p:300000,r:1800}, SD:{p:300000,r:1500}, TN:{p:310000,r:1900},
+  TX:{p:310000,r:2000}, UT:{p:510000,r:2100}, VT:{p:400000,r:1800},
+  VA:{p:400000,r:2100}, WA:{p:600000,r:2400}, WV:{p:170000,r:1200},
+  WI:{p:290000,r:1600}, WY:{p:360000,r:1700}, DC:{p:700000,r:2900}
+};
+const DEFAULT_HEURISTIC = { p: 400000, r: 2000 };
+
+const defaults = {
+  price: 485000, rent: 2450,
+  downPct: 25, rate: 7.25, term: 30, closing: 3,
+  taxPct: 1.25, insurance: 1800, hoa: 0,
+  maintPct: 1.0, capexPct: 1.0, vacancyPct: 6, mgmtPct: 8,
+  utilities: 0, leasing: 600,
+  rentGrowth: 3.0, expGrowth: 3.0, appreciation: 3.5
+};
+
+let state = {
+  listId: null,
+  passwordHash: null,
+  properties: []
+};
+let currentPropertyId = null;
+
+// =========================================================
+// Crypto helper
+// =========================================================
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function uuid() {
+  return 'p-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8);
+}
+
+// =========================================================
+// Toast
+// =========================================================
+function toast(msg, kind) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (kind || '');
+  setTimeout(() => { t.className = ''; }, 2600);
+}
+
+// =========================================================
+// JSONBlob client
+// =========================================================
+async function blobCreate(payload) {
+  const res = await fetch(JSONBLOB_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Create failed: ' + res.status);
+  const loc = res.headers.get('Location') || '';
+  const id = loc.split('/').pop();
+  if (!id) throw new Error('No ID returned');
+  return id;
+}
+
+async function blobGet(id) {
+  const res = await fetch(JSONBLOB_API + '/' + id, {
+    headers: { 'Accept': 'application/json' }
+  });
+  if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+  return res.json();
+}
+
+async function blobPut(id, payload) {
+  const res = await fetch(JSONBLOB_API + '/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Save failed: ' + res.status);
+}
+
+// =========================================================
+// Gate / unlock flow
+// =========================================================
+document.querySelectorAll('#gate-tabs .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#gate-tabs .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const mode = t.dataset.mode;
+    document.getElementById('gate-create').style.display = mode === 'create' ? '' : 'none';
+    document.getElementById('gate-join').style.display = mode === 'join' ? '' : 'none';
+    document.getElementById('gate-error').textContent = '';
+  });
+});
+
+function gateError(msg) {
+  document.getElementById('gate-error').textContent = msg || '';
+}
+
+async function createList() {
+  gateError('');
+  const pw = document.getElementById('create-password').value;
+  if (!pw || pw.length < 3) return gateError('Password must be at least 3 characters.');
+  try {
+    const hash = await sha256(pw);
+    const payload = { passwordHash: hash, properties: [] };
+    const id = await blobCreate(payload);
+    saveSession(id, pw);
+    location.hash = '#list=' + id;
+    state = { listId: id, passwordHash: hash, properties: [] };
+    enterApp();
+    toast('New shared list created', 'success');
+  } catch (e) {
+    gateError('Could not create list: ' + e.message);
+  }
+}
+
+async function joinList() {
+  gateError('');
+  const id = document.getElementById('join-id').value.trim();
+  const pw = document.getElementById('join-password').value;
+  if (!id) return gateError('Enter a list ID.');
+  if (!pw) return gateError('Enter the password.');
+  try {
+    const data = await blobGet(id);
+    const hash = await sha256(pw);
+    if (!data || data.passwordHash !== hash) return gateError('Wrong password.');
+    saveSession(id, pw);
+    location.hash = '#list=' + id;
+    state = { listId: id, passwordHash: hash, properties: data.properties || [] };
+    enterApp();
+    toast('Joined list', 'success');
+  } catch (e) {
+    gateError('Could not load list: ' + e.message);
+  }
+}
+
+async function unlock() {
+  gateError('');
+  const id = parseListIdFromHash();
+  const pw = document.getElementById('unlock-password').value;
+  if (!pw) return gateError('Enter the password.');
+  try {
+    const data = await blobGet(id);
+    const hash = await sha256(pw);
+    if (!data || data.passwordHash !== hash) return gateError('Wrong password.');
+    saveSession(id, pw);
+    state = { listId: id, passwordHash: hash, properties: data.properties || [] };
+    enterApp();
+    toast('Unlocked', 'success');
+  } catch (e) {
+    gateError('Could not load list: ' + e.message);
+  }
+}
+
+function resetGate() {
+  location.hash = '';
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('gate-unlock').style.display = 'none';
+  document.getElementById('gate-create').style.display = '';
+  document.getElementById('gate-tabs').style.display = '';
+  document.getElementById('gate-intro').textContent = 'Shared property analysis. Choose how to get started.';
+  gateError('');
+}
+
+function saveSession(id, pw) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id, pw }));
+  } catch (e) {}
+}
+function loadSession() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function parseListIdFromHash() {
+  const m = (location.hash || '').match(/list=([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+// =========================================================
+// App enter
+// =========================================================
+function enterApp() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  document.getElementById('listId-display').textContent = state.listId;
+  document.getElementById('set-listId').value = state.listId;
+  document.getElementById('set-shareLink').value = buildShareLink();
+  renderPropList();
+  if (state.properties.length > 0) {
+    loadProperty(state.properties[0].id);
+  } else {
+    newProperty();
+  }
+  compute();
+}
+
+function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+function buildShareLink() {
+  return location.origin + location.pathname + '#list=' + state.listId;
+}
+
+function copyShareLink() {
+  const link = buildShareLink();
+  navigator.clipboard.writeText(link).then(
+    () => toast('Link copied', 'success'),
+    () => toast('Copy failed', 'error')
+  );
+}
+
+// =========================================================
+// Property list UI
+// =========================================================
+function renderPropList() {
+  const ul = document.getElementById('propList');
+  ul.innerHTML = '';
+  state.properties.forEach(p => {
+    const li = document.createElement('li');
+    if (p.id === currentPropertyId) li.classList.add('active');
+    const cf = p.summary && typeof p.summary.monthlyCashFlow === 'number'
+      ? (p.summary.monthlyCashFlow >= 0 ? '+' : '') + '$' + Math.round(p.summary.monthlyCashFlow).toLocaleString() + '/mo'
+      : '';
+    li.innerHTML = `
+      <div class="name">${escapeHtml(p.name || '(unnamed)')}</div>
+      <div class="addr">${escapeHtml(p.address || '')}</div>
+      <div class="cf">${cf}</div>
+    `;
+    li.onclick = () => loadProperty(p.id);
+    ul.appendChild(li);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// =========================================================
+// Property CRUD (local, with remote sync)
+// =========================================================
+function newProperty() {
+  currentPropertyId = null;
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-address').value = '';
+  document.getElementById('lookup-note').textContent = '';
+  for (const k of Object.keys(defaults)) {
+    document.getElementById(k).value = defaults[k];
+  }
+  document.getElementById('paidOff').checked = false;
+  document.getElementById('delete-btn').style.display = 'none';
+  renderPropList();
+  compute();
+}
+
+function loadProperty(id) {
+  const p = state.properties.find(x => x.id === id);
+  if (!p) return;
+  currentPropertyId = id;
+  document.getElementById('p-name').value = p.name || '';
+  document.getElementById('p-address').value = p.address || '';
+  document.getElementById('lookup-note').textContent = p.lookupNote || '';
+  const values = p.values || {};
+  for (const k of Object.keys(defaults)) {
+    document.getElementById(k).value = values[k] !== undefined ? values[k] : defaults[k];
+  }
+  document.getElementById('paidOff').checked = !!values.paidOff;
+  document.getElementById('delete-btn').style.display = '';
+  renderPropList();
+  compute();
+}
+
+function collectCurrentValues() {
+  const values = {};
+  for (const k of Object.keys(defaults)) {
+    values[k] = parseFloat(document.getElementById(k).value) || 0;
+  }
+  values.paidOff = document.getElementById('paidOff').checked;
+  return values;
+}
+
+async function saveProperty() {
+  const name = document.getElementById('p-name').value.trim();
+  const address = document.getElementById('p-address').value.trim();
+  if (!name && !address) return toast('Add a nickname or address first', 'error');
+  const values = collectCurrentValues();
+  const summary = computeSummary(values);
+  const lookupNote = document.getElementById('lookup-note').textContent;
+
+  if (currentPropertyId) {
+    const p = state.properties.find(x => x.id === currentPropertyId);
+    if (p) {
+      p.name = name; p.address = address; p.values = values;
+      p.summary = summary; p.lookupNote = lookupNote;
+      p.updatedAt = new Date().toISOString();
+    }
+  } else {
+    const p = {
+      id: uuid(),
+      name, address, values, summary, lookupNote,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    state.properties.push(p);
+    currentPropertyId = p.id;
+    document.getElementById('delete-btn').style.display = '';
+  }
+
+  await persistRemote();
+  renderPropList();
+  toast('Saved', 'success');
+}
+
+async function deleteProperty() {
+  if (!currentPropertyId) return;
+  if (!confirm('Delete this property from the shared list?')) return;
+  state.properties = state.properties.filter(p => p.id !== currentPropertyId);
+  currentPropertyId = null;
+  await persistRemote();
+  if (state.properties.length > 0) loadProperty(state.properties[0].id);
+  else newProperty();
+  toast('Deleted', 'success');
+}
+
+async function persistRemote() {
+  try {
+    await blobPut(state.listId, {
+      passwordHash: state.passwordHash,
+      properties: state.properties
+    });
+  } catch (e) {
+    toast('Save to shared list failed: ' + e.message, 'error');
+  }
+}
+
+// =========================================================
+// Address lookup
+// =========================================================
+async function lookupAddress() {
+  const address = document.getElementById('p-address').value.trim();
+  const note = document.getElementById('lookup-note');
+  if (!address) return toast('Enter an address first', 'error');
+  note.textContent = 'Looking up…';
+  try {
+    const url = 'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=' + encodeURIComponent(address);
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('Geocode failed: ' + res.status);
+    const arr = await res.json();
+    if (!arr || arr.length === 0) {
+      note.textContent = 'Address not found. Values unchanged — adjust manually.';
+      return;
+    }
+    const r = arr[0];
+    const stateCode = stateAbbrFromNominatim(r.address);
+    const normalizedAddr = r.display_name;
+    const h = STATE_HEURISTICS[stateCode] || DEFAULT_HEURISTIC;
+
+    document.getElementById('price').value = h.p;
+    document.getElementById('rent').value = h.r;
+
+    // Default tax rate varies a lot by state; keep a short table
+    const taxByState = {
+      CA: 1.25, TX: 1.80, FL: 0.90, NY: 1.70, IL: 2.20, NJ: 2.30,
+      NH: 2.10, CT: 2.00, OH: 1.50, PA: 1.50, MI: 1.55, WI: 1.70,
+      CO: 0.55, AZ: 0.65, NV: 0.55, OR: 0.95, WA: 0.95, GA: 0.90,
+      NC: 0.80, SC: 0.55, TN: 0.65, AL: 0.40, LA: 0.55, MA: 1.15
+    };
+    if (stateCode && taxByState[stateCode] !== undefined) {
+      document.getElementById('taxPct').value = taxByState[stateCode];
+    }
+
+    note.textContent = `Resolved to: ${normalizedAddr}. Applied ${stateCode || 'US-default'} heuristics (price ~$${h.p.toLocaleString()}, rent ~$${h.r.toLocaleString()}/mo). These are state medians — verify with local comps.`;
+    compute();
+  } catch (e) {
+    note.textContent = 'Lookup failed: ' + e.message;
+  }
+}
+
+function stateAbbrFromNominatim(addr) {
+  if (!addr) return null;
+  if (addr['ISO3166-2-lvl4']) {
+    const parts = addr['ISO3166-2-lvl4'].split('-');
+    if (parts.length === 2) return parts[1];
+  }
+  const NAME_TO_ABBR = {
+    'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO',
+    'Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID',
+    'Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA',
+    'Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS',
+    'Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ',
+    'New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK',
+    'Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',
+    'Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA',
+    'West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY','District of Columbia':'DC'
+  };
+  return NAME_TO_ABBR[addr.state] || null;
+}
+
+// =========================================================
+// Computations (same as single-property version)
+// =========================================================
+function mortgagePayment(principal, annualRatePct, years) {
+  if (principal <= 0) return 0;
+  const r = (annualRatePct / 100) / 12;
+  const n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+}
+
+function computeSummary(i) {
+  const paidOff = !!i.paidOff;
+  const downPayment = paidOff ? i.price : i.price * i.downPct / 100;
+  const loanAmount = paidOff ? 0 : i.price - downPayment;
+  const closingCosts = i.price * i.closing / 100;
+  const cashNeeded = paidOff ? (i.price + closingCosts) : (downPayment + closingCosts);
+  const annualDebtService = paidOff ? 0 : mortgagePayment(loanAmount, i.rate, i.term) * 12;
+
+  const grossRent = i.rent * 12;
+  const vacancy = grossRent * i.vacancyPct / 100;
+  const egi = grossRent - vacancy;
+  const tax = i.price * i.taxPct / 100;
+  const hoa = i.hoa * 12;
+  const maint = i.price * i.maintPct / 100;
+  const capex = i.price * i.capexPct / 100;
+  const mgmt = grossRent * i.mgmtPct / 100;
+  const util = i.utilities * 12;
+  const opex = tax + i.insurance + hoa + maint + capex + mgmt + util + i.leasing;
+  const noi = egi - opex;
+  const annualCashFlow = noi - annualDebtService;
+  return {
+    grossRent, vacancy, egi,
+    tax, insurance: i.insurance, hoa, maint, capex, mgmt, util, leasing: i.leasing,
+    noi, annualDebtService, annualCashFlow,
+    monthlyCashFlow: annualCashFlow / 12,
+    capRate: (noi / i.price) * 100,
+    coc: (annualCashFlow / cashNeeded) * 100,
+    grm: i.price / grossRent,
+    onePct: (i.rent / i.price) * 100,
+    dscr: annualDebtService > 0 ? noi / annualDebtService : Infinity,
+    cashNeeded
+  };
+}
+
+const fmt$ = n => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString();
+const fmtPct = n => (isFinite(n) ? n.toFixed(2) : '—') + '%';
+const fmtNum = n => isFinite(n) ? n.toFixed(2) : '∞';
+
+function compute() {
+  const i = collectCurrentValues();
+  const paidOff = i.paidOff;
+  ['downPct','rate','term'].forEach(id => {
+    const el = document.getElementById(id);
+    el.disabled = paidOff;
+    el.style.opacity = paidOff ? 0.4 : 1;
+  });
+
+  const s = computeSummary(i);
+
+  const cfEl = document.getElementById('m-cashflow');
+  cfEl.textContent = fmt$(s.monthlyCashFlow) + '/mo';
+  cfEl.className = 'value ' + (s.monthlyCashFlow >= 0 ? 'good' : 'bad');
+  document.getElementById('m-cashflow-annual').textContent = fmt$(s.annualCashFlow) + '/yr';
+
+  const capEl = document.getElementById('m-cap');
+  capEl.textContent = fmtPct(s.capRate);
+  capEl.className = 'value ' + (s.capRate >= 5 ? 'good' : '');
+
+  const cocEl = document.getElementById('m-coc');
+  cocEl.textContent = fmtPct(s.coc);
+  cocEl.className = 'value ' + (s.coc >= 6 ? 'good' : s.coc < 0 ? 'bad' : '');
+
+  document.getElementById('m-grm').textContent = fmtNum(s.grm);
+  document.getElementById('m-1pct').textContent = fmtPct(s.onePct) + ' (≥1%)';
+  const dscrEl = document.getElementById('m-dscr');
+  dscrEl.textContent = isFinite(s.dscr) ? fmtNum(s.dscr) : '∞';
+  dscrEl.className = 'value ' + (s.dscr >= 1.25 ? 'good' : s.dscr < 1 ? 'bad' : '');
+  document.getElementById('m-cash-needed').textContent = fmt$(s.cashNeeded);
+
+  document.getElementById('b-gross').textContent = fmt$(s.grossRent);
+  document.getElementById('b-vacancy').textContent = fmt$(-s.vacancy);
+  document.getElementById('b-egi').textContent = fmt$(s.egi);
+  document.getElementById('b-tax').textContent = fmt$(-s.tax);
+  document.getElementById('b-ins').textContent = fmt$(-s.insurance);
+  document.getElementById('b-hoa').textContent = fmt$(-s.hoa);
+  document.getElementById('b-maint').textContent = fmt$(-s.maint);
+  document.getElementById('b-capex').textContent = fmt$(-s.capex);
+  document.getElementById('b-mgmt').textContent = fmt$(-s.mgmt);
+  document.getElementById('b-util').textContent = fmt$(-s.util);
+  document.getElementById('b-lease').textContent = fmt$(-s.leasing);
+  document.getElementById('b-noi').textContent = fmt$(s.noi);
+  document.getElementById('b-debt').textContent = fmt$(-s.annualDebtService);
+  document.getElementById('b-cf').textContent = fmt$(s.annualCashFlow);
+
+  const body = document.getElementById('proj-body');
+  body.innerHTML = '';
+  let rentY = s.grossRent, opexY = s.noi < 0 ? (s.egi - s.noi) : (s.egi - s.noi), valY = i.price;
+  let opexBase = s.egi - s.noi;
+  for (let y = 1; y <= 5; y++) {
+    if (y > 1) {
+      rentY *= (1 + i.rentGrowth / 100);
+      opexBase *= (1 + i.expGrowth / 100);
+      valY *= (1 + i.appreciation / 100);
+    }
+    const vacY = rentY * i.vacancyPct / 100;
+    const noiY = rentY - vacY - opexBase;
+    const cfY = noiY - s.annualDebtService;
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>Year ${y}</td><td>${fmt$(rentY)}</td><td>${fmt$(noiY)}</td><td>${fmt$(cfY)}</td><td>${fmt$(valY)}</td>`;
+    body.appendChild(row);
+  }
+}
+
+// =========================================================
+// Settings / export / import
+// =========================================================
+function openSettings() {
+  document.getElementById('set-listId').value = state.listId;
+  document.getElementById('set-shareLink').value = buildShareLink();
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state.properties, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rental-properties-' + state.listId + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function importData(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const arr = JSON.parse(text);
+    if (!Array.isArray(arr)) throw new Error('Expected a JSON array');
+    if (!confirm('Import ' + arr.length + ' properties and REPLACE the current list?')) return;
+    state.properties = arr;
+    await persistRemote();
+    renderPropList();
+    if (state.properties.length > 0) loadProperty(state.properties[0].id);
+    else newProperty();
+    toast('Imported', 'success');
+  } catch (e) {
+    toast('Import failed: ' + e.message, 'error');
+  }
+  evt.target.value = '';
+}
+
+function leaveList() {
+  if (!confirm('Leave this list? Your local session will be cleared. The shared data remains on jsonblob for anyone else with the link.')) return;
+  sessionStorage.removeItem(SESSION_KEY);
+  location.hash = '';
+  location.reload();
+}
+
+// =========================================================
+// Wire up inputs
+// =========================================================
+document.querySelectorAll('.panel input, #paidOff').forEach(el => {
+  if (el.id === 'p-name' || el.id === 'p-address') return;
+  el.addEventListener('input', compute);
+  el.addEventListener('change', compute);
+});
+
+// =========================================================
+// Bootstrap
+// =========================================================
+(async function init() {
+  const hashId = parseListIdFromHash();
+  const session = loadSession();
+
+  if (hashId && session && session.id === hashId && session.pw) {
+    // Try auto-unlock from session
+    try {
+      const data = await blobGet(hashId);
+      const hash = await sha256(session.pw);
+      if (data && data.passwordHash === hash) {
+        state = { listId: hashId, passwordHash: hash, properties: data.properties || [] };
+        enterApp();
+        return;
+      }
+    } catch (e) { /* fall through to gate */ }
+  }
+
+  if (hashId) {
+    // Show unlock prompt
+    document.getElementById('gate-create').style.display = 'none';
+    document.getElementById('gate-join').style.display = 'none';
+    document.getElementById('gate-tabs').style.display = 'none';
+    document.getElementById('gate-unlock').style.display = '';
+    document.getElementById('gate-intro').textContent = 'Opening list ' + hashId.slice(0,8) + '…';
+    document.getElementById('unlock-password').focus();
+  }
+})();
+</script>
+</body>
+</html>
