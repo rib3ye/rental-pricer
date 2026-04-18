@@ -96,12 +96,19 @@
   }
   .section-break {
     border-top: 1px dashed var(--border);
-    margin: 16px 0 12px 0;
+    margin: 16px 0 4px 0;
     padding-top: 12px;
     font-size: 12px;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+  }
+  .section-desc {
+    font-size: 12px;
+    color: #9aa5b4;
+    margin: 0 0 12px 0;
+    line-height: 1.45;
+    font-style: italic;
   }
   .metrics {
     display: grid;
@@ -227,6 +234,7 @@
       <h2>Inputs <button class="reset" onclick="resetDefaults()">Reset defaults</button></h2>
 
       <div class="section-break">Property</div>
+      <div class="section-desc">Price and rent are the two most sensitive inputs — a 5% error in either swings cash flow more than any single operating-expense assumption. Anchor these to real comps, not rules of thumb.</div>
       <div class="field">
         <label>Purchase price<span class="hint">Best guess based on 95207 SFH comps, ~1,800 sqft, 3/2</span></label>
         <div class="suffix"><input type="number" id="price" value="420000" /><span>$</span></div>
@@ -237,6 +245,7 @@
       </div>
 
       <div class="section-break">Financing</div>
+      <div class="section-desc">Debt service is typically the largest monthly line item and drives cash-on-cash return. Small rate or term changes move cash flow meaningfully. If paid off, these inputs don't apply — but price-driven expenses (tax, maintenance, capex) still hit the bottom line.</div>
       <div class="field">
         <label>Property is paid off (no mortgage)<span class="hint">Check this if buying cash or analyzing an already-owned property</span></label>
         <div class="suffix" style="grid-template-columns: 1fr;"><input type="checkbox" id="paidOff" checked style="width:auto; justify-self:end; transform:scale(1.3);" /></div>
@@ -259,6 +268,7 @@
       </div>
 
       <div class="section-break">Operating expenses (annual)</div>
+      <div class="section-desc">The gap between "gross rent" and "what you actually keep" lives here. Underestimating any line is the #1 way amateur pro-formas overstate returns. Rules of thumb (1% maintenance, 1% capex, 8% management) are floors for well-kept properties — older or rough units run higher.</div>
       <div class="field">
         <label>Property tax<span class="hint">CA Prop 13: ~1.1% base + San Joaquin Co. assessments can push effective to ~1.25%</span></label>
         <div class="suffix"><input type="number" id="taxPct" value="1.25" step="0.01" /><span>% of price</span></div>
@@ -297,6 +307,7 @@
       </div>
 
       <div class="section-break">Growth assumptions (for 5-yr projection)</div>
+      <div class="section-desc">Small compounding differences dominate long-run returns. Be conservative — it's easier to revise up if the market surprises you than to survive undershooting. Don't underwrite to the appreciation you need; underwrite to what the cash flow supports.</div>
       <div class="field">
         <label>Annual rent growth</label>
         <div class="suffix"><input type="number" id="rentGrowth" value="3.0" step="0.1" /><span>%</span></div>
