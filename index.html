@@ -268,7 +268,7 @@
       </div>
 
       <div class="section-break">Operating expenses (annual)</div>
-      <div class="section-desc">The gap between "gross rent" and "what you actually keep" lives here. Underestimating any line is the #1 way amateur pro-formas overstate returns. Rules of thumb (1% maintenance, 1% capex, 8% management) are floors for well-kept properties — older or rough units run higher.</div>
+      <div class="section-desc">The gap between "gross rent" and "what you actually keep" lives here. These are ongoing costs of running the rental — they don't preserve asset value, they just keep the doors open. Rules of thumb (1% maintenance, 8% management) are floors for well-kept properties; older or rough units run higher.</div>
       <div class="field">
         <label>Property tax<span class="hint">CA Prop 13: ~1.1% base + San Joaquin Co. assessments can push effective to ~1.25%</span></label>
         <div class="suffix"><input type="number" id="taxPct" value="1.25" step="0.01" /><span>% of price</span></div>
@@ -282,12 +282,12 @@
         <div class="suffix"><input type="number" id="hoa" value="0" /><span>$/mo</span></div>
       </div>
       <div class="field">
-        <label>Maintenance reserve<span class="hint">Rule of thumb: 1% of property value per year for ongoing repairs</span></label>
-        <div class="suffix"><input type="number" id="maintPct" value="1.0" step="0.1" /><span>% of price/yr</span></div>
+        <label>Fixed maintenance<span class="hint">Lawn care, pool service, pest, recurring contracts</span></label>
+        <div class="suffix"><input type="number" id="maintFixed" value="150" /><span>$/mo</span></div>
       </div>
       <div class="field">
-        <label>CapEx reserve<span class="hint">Roof, HVAC, water heater, flooring — big-ticket replacements amortized</span></label>
-        <div class="suffix"><input type="number" id="capexPct" value="1.0" step="0.1" /><span>% of price/yr</span></div>
+        <label>Variable maintenance<span class="hint">Minor repairs, appliance fixes, turn punch-list — scales with tenant activity, not home value</span></label>
+        <div class="suffix"><input type="number" id="maintRentPct" value="2" step="0.1" /><span>% of rent</span></div>
       </div>
       <div class="field">
         <label>Vacancy<span class="hint">Stockton rental market vacancy historically ~5–8%</span></label>
@@ -306,8 +306,8 @@
         <div class="suffix"><input type="number" id="leasing" value="600" /><span>$/yr</span></div>
       </div>
 
-      <div class="section-break">Growth assumptions (for 5-yr projection)</div>
-      <div class="section-desc">Small compounding differences dominate long-run returns. Be conservative — it's easier to revise up if the market surprises you than to survive undershooting. Don't underwrite to the appreciation you need; underwrite to what the cash flow supports.</div>
+      <div class="section-break">Growth & capital (long-run)</div>
+      <div class="section-desc">Small compounding differences dominate long-run returns. CapEx (major replacements) lives here rather than with operating expenses: a new roof preserves value, it doesn't reduce rent. Counting it as a cash-flow drag <em>and</em> booking full appreciation would be double-counting — it should offset appreciation, not rent.</div>
       <div class="field">
         <label>Annual rent growth</label>
         <div class="suffix"><input type="number" id="rentGrowth" value="3.0" step="0.1" /><span>%</span></div>
@@ -317,8 +317,12 @@
         <div class="suffix"><input type="number" id="expGrowth" value="3.0" step="0.1" /><span>%</span></div>
       </div>
       <div class="field">
-        <label>Annual appreciation<span class="hint">Stockton 10-yr avg ~5–7%; volatile, don't count on it</span></label>
+        <label>Annual appreciation (gross)<span class="hint">Stockton 10-yr avg ~5–7%; volatile, don't count on it</span></label>
         <div class="suffix"><input type="number" id="appreciation" value="3.5" step="0.1" /><span>%</span></div>
+      </div>
+      <div class="field">
+        <label>CapEx reserve<span class="hint">Roof, HVAC, water heater, flooring. Offsets appreciation, not cash flow.</span></label>
+        <div class="suffix"><input type="number" id="capexPct" value="1.0" step="0.1" /><span>% of value/yr</span></div>
       </div>
     </div>
 
@@ -369,7 +373,6 @@
           <tr class="negative"><td>– Insurance</td><td id="b-ins">—</td></tr>
           <tr class="negative"><td>– HOA</td><td id="b-hoa">—</td></tr>
           <tr class="negative"><td>– Maintenance</td><td id="b-maint">—</td></tr>
-          <tr class="negative"><td>– CapEx reserve</td><td id="b-capex">—</td></tr>
           <tr class="negative"><td>– Property management</td><td id="b-mgmt">—</td></tr>
           <tr class="negative"><td>– Utilities</td><td id="b-util">—</td></tr>
           <tr class="negative"><td>– Leasing/turnover</td><td id="b-lease">—</td></tr>
@@ -379,10 +382,19 @@
         </tbody>
       </table>
 
+      <div class="section-break">Wealth building (non-cash, unrealized)</div>
+      <table class="breakdown">
+        <tbody>
+          <tr class="positive"><td>+ Gross appreciation (value × apprec. %)</td><td id="w-gross-apprec">—</td></tr>
+          <tr class="negative"><td>– CapEx reserve (big-ticket replacements)</td><td id="w-capex">—</td></tr>
+          <tr class="total"><td>= Net appreciation (unrealized)</td><td id="w-net-apprec">—</td></tr>
+        </tbody>
+      </table>
+
       <div class="section-break">5-year projection</div>
       <table class="breakdown" id="projection">
         <thead>
-          <tr><td>Year</td><td>Rent</td><td>NOI</td><td>Cash flow</td><td>Home value</td></tr>
+          <tr><td>Year</td><td>Rent</td><td>NOI</td><td>Cash flow</td><td>Home value</td><td>Net apprec.</td></tr>
         </thead>
         <tbody id="proj-body"></tbody>
       </table>
@@ -486,7 +498,7 @@
     price: 420000, rent: 2450,
     downPct: 25, rate: 7.25, term: 30, closing: 3,
     taxPct: 1.25, insurance: 1800, hoa: 0,
-    maintPct: 1.0, capexPct: 1.0, vacancyPct: 6, mgmtPct: 8,
+    maintFixed: 150, maintRentPct: 2, capexPct: 1.0, vacancyPct: 6, mgmtPct: 8,
     utilities: 0, leasing: 600,
     rentGrowth: 3.0, expGrowth: 3.0, appreciation: 3.5
   };
@@ -536,15 +548,18 @@
 
     const tax = i.price * i.taxPct / 100;
     const hoa = i.hoa * 12;
-    const maint = i.price * i.maintPct / 100;
+    const maint = (i.maintFixed * 12) + (grossRent * i.maintRentPct / 100);
     const capex = i.price * i.capexPct / 100;
     const mgmt = grossRent * i.mgmtPct / 100;
     const util = i.utilities * 12;
 
-    const opex = tax + i.insurance + hoa + maint + capex + mgmt + util + i.leasing;
+    const opex = tax + i.insurance + hoa + maint + mgmt + util + i.leasing;
     const noi = egi - opex;
     const annualCashFlow = noi - annualDebtService;
     const monthlyCashFlow = annualCashFlow / 12;
+
+    const grossApprec = i.price * i.appreciation / 100;
+    const netApprec = grossApprec - capex;
 
     const capRate = (noi / i.price) * 100;
     const coc = (annualCashFlow / cashNeeded) * 100;
@@ -583,7 +598,6 @@
     document.getElementById('b-ins').textContent = fmt$(-i.insurance);
     document.getElementById('b-hoa').textContent = fmt$(-hoa);
     document.getElementById('b-maint').textContent = fmt$(-maint);
-    document.getElementById('b-capex').textContent = fmt$(-capex);
     document.getElementById('b-mgmt').textContent = fmt$(-mgmt);
     document.getElementById('b-util').textContent = fmt$(-util);
     document.getElementById('b-lease').textContent = fmt$(-i.leasing);
@@ -591,22 +605,29 @@
     document.getElementById('b-debt').textContent = fmt$(-annualDebtService);
     document.getElementById('b-cf').textContent = fmt$(annualCashFlow);
 
+    // Wealth building
+    document.getElementById('w-gross-apprec').textContent = fmt$(grossApprec);
+    document.getElementById('w-capex').textContent = fmt$(-capex);
+    document.getElementById('w-net-apprec').textContent = fmt$(netApprec);
+
     // 5-yr projection
     const body = document.getElementById('proj-body');
     body.innerHTML = '';
-    let rentY = grossRent, opexY = opex, valY = i.price;
+    let rentY = grossRent, opexY = opex, valY = i.price, capexY = capex;
     for (let y = 1; y <= 5; y++) {
       if (y > 1) {
         rentY *= (1 + i.rentGrowth / 100);
         opexY *= (1 + i.expGrowth / 100);
         valY *= (1 + i.appreciation / 100);
+        capexY *= (1 + i.expGrowth / 100);
       }
       const vacY = rentY * i.vacancyPct / 100;
-      // opex scales with expGrowth only on fixed items; mgmt scales with rent; simplified here
       const noiY = rentY - vacY - opexY;
       const cfY = noiY - annualDebtService;
+      const apprecY = valY * i.appreciation / 100;
+      const netApprecY = apprecY - capexY;
       const row = document.createElement('tr');
-      row.innerHTML = `<td>Year ${y}</td><td>${fmt$(rentY)}</td><td>${fmt$(noiY)}</td><td>${fmt$(cfY)}</td><td>${fmt$(valY)}</td>`;
+      row.innerHTML = `<td>Year ${y}</td><td>${fmt$(rentY)}</td><td>${fmt$(noiY)}</td><td>${fmt$(cfY)}</td><td>${fmt$(valY)}</td><td>${fmt$(netApprecY)}</td>`;
       body.appendChild(row);
     }
   }
