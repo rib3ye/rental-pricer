@@ -3,494 +3,935 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Rental Report — 3002 Hillview Ave, Stockton CA 95207</title>
+<title>The Hillview Report — 3002 Hillview Ave, Stockton CA</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+
 <style>
   :root {
-    --bg: #0f1419;
-    --panel: #1a2029;
-    --panel-2: #222a35;
-    --border: #2f3a47;
-    --text: #e6edf3;
-    --muted: #8b98a9;
-    --accent: #4ea1ff;
-    --good: #3ecf8e;
-    --bad: #ff6b6b;
-    --warn: #ffb454;
+    --paper: #f3ece0;
+    --paper-warm: #ebe3d3;
+    --paper-shadow: #d9cfbc;
+    --ink: #1a2540;
+    --ink-soft: #3d3f45;
+    --ink-muted: #7a7368;
+    --red: #8c1c13;
+    --red-dim: #b44f44;
+    --gold: #b48751;
+    --rule: #c9bfae;
+    --rule-soft: #ddd3c1;
   }
-  * { box-sizing: border-box; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--paper); }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 24px;
-    line-height: 1.5;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    font-variation-settings: 'opsz' 14, 'SOFT' 50;
+    line-height: 1.55;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(ellipse 70% 50% at 15% 10%, rgba(180, 135, 81, 0.08), transparent 60%),
+      radial-gradient(ellipse 60% 70% at 90% 80%, rgba(140, 28, 19, 0.04), transparent 60%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
-  .container { max-width: 1200px; margin: 0 auto; }
-  header {
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 16px;
-    margin-bottom: 24px;
+
+  /* Paper grain — subtle, multiplicative */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.18 0 0 0 0 0.08 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    z-index: 1;
   }
-  h1 { margin: 0 0 4px 0; font-size: 24px; }
-  .sub { color: var(--muted); font-size: 14px; }
-  .grid {
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 72px 48px 120px;
+    position: relative;
+    z-index: 2;
+  }
+  @media (max-width: 700px) { .container { padding: 40px 24px 80px; } }
+
+  /* ---------- Masthead ---------- */
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 32px;
+    margin-bottom: 72px;
+    position: relative;
+  }
+  .masthead::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--ink);
+  }
+  .eyebrow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--red);
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .eyebrow .right { color: var(--ink-muted); }
+  .masthead h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(52px, 10vw, 120px);
+    letter-spacing: -0.035em;
+    line-height: 0.92;
+    font-variation-settings: 'opsz' 144;
+    color: var(--ink);
+  }
+  .masthead h1 .amp {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--red);
+    font-size: 0.9em;
+  }
+  .subhead {
+    margin-top: 22px;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-soft);
+    max-width: 54ch;
+    line-height: 1.35;
+  }
+  .masthead .meta {
+    margin-top: 28px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .masthead .meta .tag {
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    background: rgba(255,255,255,0.35);
+  }
+  .masthead .meta a {
+    color: var(--red);
+    text-decoration: none;
+    border-bottom: 1px solid var(--red);
+    padding-bottom: 1px;
+  }
+  .masthead .meta a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+  /* ---------- Section markers ---------- */
+  .section {
+    margin-bottom: 64px;
+    position: relative;
+  }
+  .section-head {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    align-items: baseline;
+    gap: 24px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .section-head::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--ink);
+  }
+  .section-head .roman {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: 56px;
+    color: var(--red);
+    line-height: 0.9;
+    font-variation-settings: 'opsz' 144;
+  }
+  .section-head .title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    font-variation-settings: 'opsz' 48;
+  }
+  .section-head .annotation {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-muted);
+    align-self: center;
+  }
+  .section-head .annotation button {
+    font-family: inherit; font-size: inherit; text-transform: inherit; letter-spacing: inherit;
+    background: transparent; border: none; color: var(--red);
+    cursor: pointer; padding: 2px 0;
+    border-bottom: 1px solid var(--red);
+  }
+  .section-head .annotation button:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .section-desc {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: 70ch;
+    margin-bottom: 32px;
+    padding-left: 96px;
+  }
+  @media (max-width: 700px) { .section-desc { padding-left: 0; } }
+  .section-desc em, .section-desc i { color: var(--red); font-style: italic; }
+
+  /* ---------- Subsection labels ---------- */
+  .sublabel {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--red);
+    margin: 28px 0 10px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .sublabel:first-child { margin-top: 0; }
+  .sublabel em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-muted);
+    font-size: 13px;
+    margin-left: 10px;
+  }
+
+  /* ---------- Two-column grid ---------- */
+  .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 64px;
   }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-  }
-  .panel h2 {
-    margin: 0 0 16px 0;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-  }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; gap: 48px; } }
+
+  /* ---------- Field rows (ledger-style input lines) ---------- */
   .field {
     display: grid;
-    grid-template-columns: 1fr 140px;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
+    grid-template-columns: 1fr minmax(150px, 200px);
+    align-items: baseline;
+    gap: 24px;
+    padding: 14px 0 10px 0;
+    border-bottom: 1px dotted var(--rule);
   }
-  .field label {
-    font-size: 14px;
+  .field-label {
+    font-family: 'Fraunces', serif;
+    font-size: 15.5px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.3;
   }
-  .field .hint {
-    font-size: 11px;
-    color: var(--muted);
+  .field-label .hint {
     display: block;
-    margin-top: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    line-height: 1.5;
   }
-  .field input[type="number"] {
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 14px;
-    text-align: right;
-    width: 100%;
-    font-family: "SF Mono", Menlo, monospace;
-  }
-  .field input[type="number"]:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .field .suffix {
+  .field-input {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 6px;
-    align-items: center;
+    gap: 10px;
+    align-items: baseline;
   }
-  .field .suffix span {
-    color: var(--muted);
-    font-size: 12px;
+  .field-input input[type="number"] {
+    border: none;
+    background: transparent;
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: 'tnum', 'lnum';
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--ink);
+    text-align: right;
+    border-bottom: 1.5px solid var(--ink);
+    padding: 4px 0;
+    width: 100%;
+    transition: border-color 0.18s ease, color 0.18s ease;
+    border-radius: 0;
+    -webkit-appearance: none;
   }
-  .section-break {
-    border-top: 1px dashed var(--border);
-    margin: 16px 0 4px 0;
-    padding-top: 12px;
-    font-size: 12px;
-    color: var(--muted);
+  .field-input input[type="number"]:focus {
+    outline: none;
+    border-bottom-color: var(--red);
+    color: var(--red);
+  }
+  .field-input input[type="number"]:disabled {
+    color: var(--paper-shadow);
+    border-bottom: 1.5px dashed var(--rule);
+  }
+  .field-input input[type="number"]::-webkit-inner-spin-button,
+  .field-input input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+  .field-input .unit {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.18em;
+    color: var(--ink-muted);
+    white-space: nowrap;
   }
-  .section-desc {
-    font-size: 12px;
-    color: #9aa5b4;
-    margin: 0 0 12px 0;
-    line-height: 1.45;
+
+  /* Checkbox — a serif cross */
+  .field-check input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border: 1.5px solid var(--ink);
+    background: rgba(255,255,255,0.4);
+    cursor: pointer;
+    position: relative;
+    justify-self: end;
+    margin-left: auto;
+    transition: background 0.15s ease;
+  }
+  .field-check input[type="checkbox"]:hover { background: rgba(255,255,255,0.7); }
+  .field-check input[type="checkbox"]:checked::after {
+    content: '×';
+    position: absolute;
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 0.6;
+    color: var(--red);
+    top: 5px;
+    left: 3px;
+    font-variation-settings: 'opsz' 144;
+  }
+  .field-check .field-input {
+    grid-template-columns: 1fr;
+    justify-items: end;
+  }
+
+  /* ---------- Big metric — the hero number ---------- */
+  .big-metric {
+    border-top: 4px double var(--ink);
+    border-bottom: 4px double var(--ink);
+    padding: 36px 0 32px;
+    margin: 8px 0 40px;
+    text-align: center;
+    position: relative;
+  }
+  .big-metric .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.32em;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
+  .big-metric .value {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 8vw, 88px);
+    line-height: 1;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+  }
+  .big-metric .value.bad { color: var(--red); }
+  .big-metric .value.good { color: var(--ink); }
+  .big-metric .sub {
+    margin-top: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .big-metric .unit {
+    font-family: 'Instrument Serif', serif;
     font-style: italic;
+    font-size: 0.55em;
+    color: var(--ink-muted);
+    margin-left: 4px;
+    vertical-align: 0.1em;
   }
+
+  /* ---------- Secondary metrics grid ---------- */
   .metrics {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
   }
+  @media (max-width: 700px) { .metrics { grid-template-columns: 1fr 1fr; } }
   .metric {
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px;
+    padding: 18px 20px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: rgba(255,255,255,0.15);
   }
   .metric .label {
-    font-size: 11px;
-    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.22em;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    line-height: 1.4;
   }
-  .metric .value {
-    font-size: 20px;
-    font-weight: 600;
-    margin-top: 4px;
-    font-family: "SF Mono", Menlo, monospace;
-  }
-  .metric .value.good { color: var(--good); }
-  .metric .value.bad { color: var(--bad); }
-  .metric .sub-value {
+  .metric .label .basis {
+    display: block;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--gold);
     font-size: 11px;
-    color: var(--muted);
     margin-top: 2px;
   }
-  .big-metric {
-    grid-column: 1 / -1;
-    padding: 16px;
-    text-align: center;
+  .metric .value {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 26px;
+    font-variation-settings: 'opsz' 48;
+    letter-spacing: -0.015em;
+    color: var(--ink);
   }
-  .big-metric .value { font-size: 28px; }
-  table.breakdown {
+  .metric .value.good { color: var(--ink); }
+  .metric .value.bad { color: var(--red); }
+
+  /* ---------- Ledger tables ---------- */
+  table.ledger {
     width: 100%;
     border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-feature-settings: 'tnum', 'lnum';
     font-size: 13px;
-    font-family: "SF Mono", Menlo, monospace;
+    margin-top: 12px;
   }
-  table.breakdown td {
-    padding: 6px 4px;
-    border-bottom: 1px solid var(--border);
+  table.ledger td {
+    padding: 10px 0;
+    border-bottom: 1px dotted var(--rule);
+    vertical-align: baseline;
   }
-  table.breakdown td:last-child {
+  table.ledger td:first-child {
+    font-family: 'Fraunces', serif;
+    font-size: 14.5px;
+    color: var(--ink);
+    padding-right: 16px;
+  }
+  table.ledger td:last-child {
     text-align: right;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
   }
-  table.breakdown tr.total td {
-    font-weight: 600;
-    border-top: 2px solid var(--border);
+  table.ledger tr.indent td:first-child { padding-left: 18px; color: var(--ink-soft); }
+  table.ledger tr.total td {
     border-bottom: none;
-    padding-top: 10px;
+    border-top: 2px solid var(--ink);
+    padding-top: 14px;
+    padding-bottom: 4px;
+    font-weight: 500;
   }
-  table.breakdown tr.negative td:last-child {
-    color: var(--bad);
-  }
-  table.breakdown tr.positive td:last-child {
-    color: var(--good);
-  }
-  .caveats {
-    margin-top: 24px;
-  }
-  .caveats h2 {
+  table.ledger tr.total td:last-child {
     font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    margin-bottom: 12px;
   }
-  .caveat-group {
-    margin-bottom: 18px;
+  table.ledger tr.grand td {
+    border-bottom: 4px double var(--ink);
+    border-top: 1px solid var(--ink);
+    padding: 14px 0;
   }
-  .caveat-group h3 {
-    font-size: 14px;
-    margin: 0 0 6px 0;
-    color: var(--warn);
+  table.ledger tr.grand td:last-child { font-size: 17px; font-weight: 500; }
+  table.ledger tr.negative td:last-child { color: var(--red); }
+  table.ledger tr.positive td:last-child { color: var(--ink); }
+  table.ledger tr.subtotal td {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-weight: 500;
   }
-  .caveat-group ul {
-    margin: 0;
-    padding-left: 20px;
-    font-size: 13px;
-    color: #cbd5e0;
-  }
-  .caveat-group li {
-    margin-bottom: 4px;
-  }
-  .reset {
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    float: right;
-  }
-  .reset:hover { border-color: var(--accent); }
-  .assumption-badge {
-    display: inline-block;
+
+  table.ledger thead td {
+    border-bottom: 1.5px solid var(--ink);
+    border-top: 1.5px solid var(--ink);
+    padding: 8px 0;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 10px;
-    background: var(--panel-2);
-    color: var(--muted);
-    padding: 1px 6px;
-    border-radius: 10px;
-    margin-left: 4px;
-    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-muted);
   }
+  table.ledger thead td:not(:first-child) { text-align: right; }
+  table.ledger.projection td:first-child {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--red);
+    font-size: 16px;
+  }
+  table.ledger.projection td:not(:first-child) { text-align: right; }
+
+  /* ---------- Caveats ---------- */
+  .caveats {
+    margin-top: 96px;
+    padding-top: 48px;
+    border-top: 4px double var(--ink);
+  }
+  .caveats-intro {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    max-width: 68ch;
+    margin-bottom: 40px;
+  }
+  .caveats-intro .dropcap {
+    float: left;
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 92px;
+    line-height: 0.82;
+    padding: 6px 16px 0 0;
+    color: var(--red);
+    font-variation-settings: 'opsz' 144;
+  }
+  .caveats h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 20px;
+    margin: 38px 0 12px 0;
+    color: var(--ink);
+    font-variation-settings: 'opsz' 48;
+    letter-spacing: -0.01em;
+  }
+  .caveats h3 .num {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--red);
+    margin-right: 12px;
+    font-weight: 400;
+  }
+  .caveats ul {
+    margin: 4px 0 0 0;
+    padding-left: 22px;
+    font-family: 'Fraunces', serif;
+    font-size: 15.5px;
+    line-height: 1.7;
+    max-width: 74ch;
+    color: var(--ink-soft);
+  }
+  .caveats li { margin-bottom: 8px; }
+  .caveats li::marker { color: var(--red); }
+  .caveats strong { color: var(--ink); font-weight: 500; }
+  .caveats .disclaimer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--rule);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    line-height: 1.65;
+    color: var(--ink-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    max-width: 64ch;
+  }
+
+  /* Colophon at the bottom */
+  .colophon {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--ink-muted);
+  }
+  .colophon .fleuron {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--red);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* ---------- Entrance animations — restrained ---------- */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .masthead, .section, .caveats {
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .masthead { animation-delay: 0s; }
+  .section:nth-of-type(1) { animation-delay: 0.12s; }
+  .section:nth-of-type(2) { animation-delay: 0.22s; }
+  .section:nth-of-type(3) { animation-delay: 0.32s; }
+  .section:nth-of-type(4) { animation-delay: 0.42s; }
+  .caveats { animation-delay: 0.55s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; }
+  }
+
+  /* Print styles */
+  @media print {
+    body::before { display: none; }
+    body { background: white; }
+    .container { padding: 0; }
+    a { color: var(--ink); }
+  }
+
+  /* Selection */
+  ::selection { background: var(--gold); color: var(--paper); }
 </style>
 </head>
 <body>
 <div class="container">
-  <header>
-    <h1>Rental Property Report</h1>
-    <div class="sub">3002 Hillview Ave, Stockton CA 95207 · Lincoln Village area · Report date: <span id="today"></span> · <a href="shared.html" style="color:var(--accent);">analyze any address →</a></div>
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>Confidential · Vol. I · Edition MMXXVI</span>
+      <span class="right">A Private Proforma</span>
+    </div>
+    <h1>The Hillview<br/>Report<span class="amp"> &</span> Yield Study</h1>
+    <div class="subhead">A ledger of assumptions, cash flows, and caveats concerning a single-family dwelling at 3002 Hillview Avenue, Stockton, California.</div>
+    <div class="meta">
+      <span class="tag">ZIP · 95207</span>
+      <span class="tag">Lincoln Village</span>
+      <span class="tag">Compiled <span id="today"></span></span>
+      <a href="shared.html">Analyze any address →</a>
+    </div>
   </header>
 
-  <div class="grid">
-    <!-- INPUTS -->
-    <div class="panel">
-      <h2>Inputs <button class="reset" onclick="resetDefaults()">Reset defaults</button></h2>
-
-      <div class="section-break">Property</div>
-      <div class="section-desc">Price and rent are the two most sensitive inputs — a 5% error in either swings cash flow more than any single operating-expense assumption. Anchor these to real comps, not rules of thumb.</div>
-      <div class="field">
-        <label>Purchase price<span class="hint">Best guess based on 95207 SFH comps, ~1,800 sqft, 3/2</span></label>
-        <div class="suffix"><input type="number" id="price" value="420000" /><span>$</span></div>
-      </div>
-      <div class="field">
-        <label>Estimated monthly market rent<span class="hint">Zillow/Rentometer typical for 3/2 in 95207</span></label>
-        <div class="suffix"><input type="number" id="rent" value="2450" /><span>$/mo</span></div>
-      </div>
-
-      <div class="section-break">Financing</div>
-      <div class="section-desc">Debt service is typically the largest monthly line item and drives cash-on-cash return. Small rate or term changes move cash flow meaningfully. If paid off, these inputs don't apply — but price-driven expenses (tax, maintenance, capex) still hit the bottom line.</div>
-      <div class="field">
-        <label>Property is paid off (no mortgage)<span class="hint">Check this if buying cash or analyzing an already-owned property</span></label>
-        <div class="suffix" style="grid-template-columns: 1fr;"><input type="checkbox" id="paidOff" checked style="width:auto; justify-self:end; transform:scale(1.3);" /></div>
-      </div>
-      <div class="field">
-        <label>Down payment</label>
-        <div class="suffix"><input type="number" id="downPct" value="25" step="0.5" /><span>%</span></div>
-      </div>
-      <div class="field">
-        <label>Mortgage rate<span class="hint">30yr conventional investment property, ~0.5–0.75% above owner-occupied</span></label>
-        <div class="suffix"><input type="number" id="rate" value="7.25" step="0.01" /><span>%</span></div>
-      </div>
-      <div class="field">
-        <label>Loan term</label>
-        <div class="suffix"><input type="number" id="term" value="30" /><span>yrs</span></div>
-      </div>
-      <div class="field">
-        <label>Closing costs<span class="hint">Loan origination, title, escrow, inspection</span></label>
-        <div class="suffix"><input type="number" id="closing" value="3" step="0.1" /><span>% of price</span></div>
-      </div>
-
-      <div class="section-break">Operating expenses (annual)</div>
-      <div class="section-desc">The gap between "gross rent" and "what you actually keep" lives here. These are ongoing costs of running the rental — they don't preserve asset value, they just keep the doors open. Rules of thumb (1% maintenance, 8% management) are floors for well-kept properties; older or rough units run higher.</div>
-      <div class="field">
-        <label>Property tax<span class="hint">CA Prop 13: ~1.1% base + San Joaquin Co. assessments can push effective to ~1.25%</span></label>
-        <div class="suffix"><input type="number" id="taxPct" value="1.25" step="0.01" /><span>% of price</span></div>
-      </div>
-      <div class="field">
-        <label>Insurance (landlord/DP3)<span class="hint">Higher than homeowner; CA market tightening</span></label>
-        <div class="suffix"><input type="number" id="insurance" value="1800" /><span>$/yr</span></div>
-      </div>
-      <div class="field">
-        <label>HOA dues<span class="hint">Lincoln Village is mostly non-HOA; verify for this parcel</span></label>
-        <div class="suffix"><input type="number" id="hoa" value="0" /><span>$/mo</span></div>
-      </div>
-      <div class="field">
-        <label>Fixed maintenance<span class="hint">Lawn care, pool service, pest, recurring contracts</span></label>
-        <div class="suffix"><input type="number" id="maintFixed" value="150" /><span>$/mo</span></div>
-      </div>
-      <div class="field">
-        <label>Variable maintenance<span class="hint">Minor repairs, appliance fixes, turn punch-list — scales with tenant activity, not home value</span></label>
-        <div class="suffix"><input type="number" id="maintRentPct" value="5" step="0.1" /><span>% of rent</span></div>
-      </div>
-      <div class="field">
-        <label>Vacancy<span class="hint">Stockton rental market vacancy historically ~5–8%</span></label>
-        <div class="suffix"><input type="number" id="vacancyPct" value="6" step="0.5" /><span>% of rent</span></div>
-      </div>
-      <div class="field">
-        <label>Property management<span class="hint">Typical 8–10% of collected rent; 0 if self-managing</span></label>
-        <div class="suffix"><input type="number" id="mgmtPct" value="8" step="0.5" /><span>% of rent</span></div>
-      </div>
-      <div class="field">
-        <label>Utilities paid by landlord<span class="hint">Usually tenant-paid for SFH; set >0 if you cover water/sewer/trash</span></label>
-        <div class="suffix"><input type="number" id="utilities" value="0" /><span>$/mo</span></div>
-      </div>
-      <div class="field">
-        <label>Leasing/turnover cost<span class="hint">Tenant-placement fee + turn costs, amortized</span></label>
-        <div class="suffix"><input type="number" id="leasing" value="600" /><span>$/yr</span></div>
-      </div>
-
-      <div class="section-break">Growth & capital (long-run)</div>
-      <div class="section-desc">Small compounding differences dominate long-run returns. CapEx (major replacements) lives here rather than with operating expenses: a new roof preserves value, it doesn't reduce rent. Counting it as a cash-flow drag <em>and</em> booking full appreciation would be double-counting — it should offset appreciation, not rent.</div>
-      <div class="field">
-        <label>Annual rent growth</label>
-        <div class="suffix"><input type="number" id="rentGrowth" value="3.0" step="0.1" /><span>%</span></div>
-      </div>
-      <div class="field">
-        <label>Annual expense growth</label>
-        <div class="suffix"><input type="number" id="expGrowth" value="3.0" step="0.1" /><span>%</span></div>
-      </div>
-      <div class="field">
-        <label>Annual appreciation (gross)<span class="hint">Stockton 10-yr avg ~5–7%; volatile, don't count on it</span></label>
-        <div class="suffix"><input type="number" id="appreciation" value="3.5" step="0.1" /><span>%</span></div>
-      </div>
-      <div class="field">
-        <label>CapEx reserve<span class="hint">Roof, HVAC, water heater, flooring. Offsets appreciation, not cash flow.</span></label>
-        <div class="suffix"><input type="number" id="capexPct" value="1.0" step="0.1" /><span>% of value/yr</span></div>
-      </div>
+  <!-- ============ SECTION I — INPUTS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <div class="roman">I.</div>
+      <div class="title">Assumptions &amp; Inputs</div>
+      <div class="annotation"><button onclick="resetDefaults()">Reset to defaults</button></div>
     </div>
 
-    <!-- RESULTS -->
-    <div class="panel">
-      <h2>Results</h2>
-
-      <div class="metrics">
-        <div class="metric big-metric">
-          <div class="label">Monthly cash flow (after all expenses & debt service)</div>
-          <div class="value" id="m-cashflow">—</div>
-          <div class="sub-value" id="m-cashflow-annual">—</div>
+    <div class="two-col">
+      <div>
+        <div class="sublabel">The Property <em>— the anchor</em></div>
+        <div class="section-desc" style="padding-left: 0; margin-bottom: 8px;">Price and rent are the two most sensitive inputs; a five-percent error in either swings cash flow more than any single operating assumption. Anchor both to <em>real comps</em>, not rules of thumb.</div>
+        <div class="field">
+          <div class="field-label">Purchase price or current value<span class="hint">Best guess; verify with Redfin, Zillow, or MLS comps within 0.5 mi</span></div>
+          <div class="field-input"><input type="number" id="price" value="420000" /><span class="unit">$</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Monthly market rent<span class="hint">Confirm via Rentometer and 5+ active listings in 95207</span></div>
+          <div class="field-input"><input type="number" id="rent" value="2450" /><span class="unit">$/mo</span></div>
         </div>
 
-        <div class="metric">
-          <div class="label">Cap rate<span class="assumption-badge">NOI / price</span></div>
-          <div class="value" id="m-cap">—</div>
+        <div class="sublabel">Financing <em>— the leverage</em></div>
+        <div class="section-desc" style="padding-left: 0; margin-bottom: 8px;">Debt service is typically the largest single line item. If the property is paid off, financing inputs are set aside, but <em>price-driven expenses</em> (tax, maintenance) still weigh on the bottom line.</div>
+        <div class="field field-check">
+          <div class="field-label">Property is paid off (no mortgage)<span class="hint">Check if buying cash or analyzing an already-owned asset</span></div>
+          <div class="field-input"><input type="checkbox" id="paidOff" checked /></div>
         </div>
-        <div class="metric">
-          <div class="label">Cash-on-cash return<span class="assumption-badge">yr 1</span></div>
-          <div class="value" id="m-coc">—</div>
+        <div class="field">
+          <div class="field-label">Down payment</div>
+          <div class="field-input"><input type="number" id="downPct" value="25" step="0.5" /><span class="unit">%</span></div>
         </div>
-        <div class="metric">
-          <div class="label">Gross rent multiplier</div>
-          <div class="value" id="m-grm">—</div>
+        <div class="field">
+          <div class="field-label">Mortgage rate<span class="hint">Investment-property rates run 0.5–0.75 pts above owner-occupied</span></div>
+          <div class="field-input"><input type="number" id="rate" value="7.25" step="0.01" /><span class="unit">%</span></div>
         </div>
-        <div class="metric">
-          <div class="label">1% rule (rent/price)</div>
-          <div class="value" id="m-1pct">—</div>
+        <div class="field">
+          <div class="field-label">Loan term</div>
+          <div class="field-input"><input type="number" id="term" value="30" /><span class="unit">yrs</span></div>
         </div>
-        <div class="metric">
-          <div class="label">DSCR<span class="assumption-badge">NOI / debt service</span></div>
-          <div class="value" id="m-dscr">—</div>
+        <div class="field">
+          <div class="field-label">Closing costs<span class="hint">Origination, title, escrow, inspection — excludes prepaids</span></div>
+          <div class="field-input"><input type="number" id="closing" value="3" step="0.1" /><span class="unit">% of price</span></div>
         </div>
-        <div class="metric">
-          <div class="label">Total cash needed at close</div>
-          <div class="value" id="m-cash-needed">—</div>
+
+        <div class="sublabel">Growth &amp; Capital <em>— the long arc</em></div>
+        <div class="section-desc" style="padding-left: 0; margin-bottom: 8px;">Small compounding differences dominate long-run returns. CapEx lives here rather than with operating expenses: <em>a new roof preserves value, it doesn't reduce rent</em>. Counting it both as a cash-flow drag <em>and</em> booking full appreciation would be double-counting.</div>
+        <div class="field">
+          <div class="field-label">Annual rent growth</div>
+          <div class="field-input"><input type="number" id="rentGrowth" value="3.0" step="0.1" /><span class="unit">%/yr</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Annual expense growth</div>
+          <div class="field-input"><input type="number" id="expGrowth" value="3.0" step="0.1" /><span class="unit">%/yr</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Annual appreciation (gross)<span class="hint">Stockton 10-yr avg ~5–7%; volatile, don't count on it</span></div>
+          <div class="field-input"><input type="number" id="appreciation" value="3.5" step="0.1" /><span class="unit">%/yr</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">CapEx reserve<span class="hint">Roof, HVAC, water heater. Offsets appreciation, not cash flow.</span></div>
+          <div class="field-input"><input type="number" id="capexPct" value="1.0" step="0.1" /><span class="unit">% of value</span></div>
         </div>
       </div>
 
-      <div class="section-break">Annual breakdown</div>
-      <table class="breakdown">
-        <tbody>
-          <tr><td>Gross scheduled rent</td><td id="b-gross">—</td></tr>
-          <tr class="negative"><td>– Vacancy loss</td><td id="b-vacancy">—</td></tr>
-          <tr class="positive"><td>= Effective gross income</td><td id="b-egi">—</td></tr>
-          <tr class="negative"><td>– Property tax</td><td id="b-tax">—</td></tr>
-          <tr class="negative"><td>– Insurance</td><td id="b-ins">—</td></tr>
-          <tr class="negative"><td>– HOA</td><td id="b-hoa">—</td></tr>
-          <tr class="negative"><td>– Maintenance</td><td id="b-maint">—</td></tr>
-          <tr class="negative"><td>– Property management</td><td id="b-mgmt">—</td></tr>
-          <tr class="negative"><td>– Utilities</td><td id="b-util">—</td></tr>
-          <tr class="negative"><td>– Leasing/turnover</td><td id="b-lease">—</td></tr>
-          <tr class="positive"><td>= Net operating income (NOI)</td><td id="b-noi">—</td></tr>
-          <tr class="negative"><td>– Debt service (P&I)</td><td id="b-debt">—</td></tr>
-          <tr class="total"><td>= Annual cash flow before tax</td><td id="b-cf">—</td></tr>
-        </tbody>
-      </table>
-
-      <div class="section-break">Wealth building (non-cash, unrealized)</div>
-      <table class="breakdown">
-        <tbody>
-          <tr class="positive"><td>+ Gross appreciation (value × apprec. %)</td><td id="w-gross-apprec">—</td></tr>
-          <tr class="negative"><td>– CapEx reserve (big-ticket replacements)</td><td id="w-capex">—</td></tr>
-          <tr class="total"><td>= Net appreciation (unrealized)</td><td id="w-net-apprec">—</td></tr>
-        </tbody>
-      </table>
-
-      <div class="section-break">5-year projection</div>
-      <table class="breakdown" id="projection">
-        <thead>
-          <tr><td>Year</td><td>Rent</td><td>NOI</td><td>Cash flow</td><td>Home value</td><td>Net apprec.</td></tr>
-        </thead>
-        <tbody id="proj-body"></tbody>
-      </table>
+      <div>
+        <div class="sublabel">Operating Expenses <em>— annual, recurring</em></div>
+        <div class="section-desc" style="padding-left: 0; margin-bottom: 8px;">The gap between gross rent and what you actually keep. These costs <em>keep the doors open</em>; they don't preserve the asset. Rules of thumb are floors for well-kept properties — older or rougher units run higher.</div>
+        <div class="field">
+          <div class="field-label">Property tax<span class="hint">CA Prop 13: ~1.1% base; San Joaquin assessments often push to ~1.25%</span></div>
+          <div class="field-input"><input type="number" id="taxPct" value="1.25" step="0.01" /><span class="unit">% of price</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Insurance (landlord / DP3)<span class="hint">Higher than homeowner; CA market tightening</span></div>
+          <div class="field-input"><input type="number" id="insurance" value="1800" /><span class="unit">$/yr</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">HOA dues<span class="hint">Lincoln Village is mostly non-HOA; verify for this parcel</span></div>
+          <div class="field-input"><input type="number" id="hoa" value="0" /><span class="unit">$/mo</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Fixed maintenance<span class="hint">Lawn, pool, pest, recurring service contracts</span></div>
+          <div class="field-input"><input type="number" id="maintFixed" value="150" /><span class="unit">$/mo</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Variable maintenance<span class="hint">Minor repairs, appliance fixes, turn punch-list — scales with tenant activity</span></div>
+          <div class="field-input"><input type="number" id="maintRentPct" value="5" step="0.1" /><span class="unit">% of rent</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Vacancy<span class="hint">Stockton rental market historically ~5–8%</span></div>
+          <div class="field-input"><input type="number" id="vacancyPct" value="6" step="0.5" /><span class="unit">% of rent</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Property management<span class="hint">Typical 8–10% if professionally managed; 0 if self-managing</span></div>
+          <div class="field-input"><input type="number" id="mgmtPct" value="8" step="0.5" /><span class="unit">% of rent</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Landlord-paid utilities<span class="hint">Usually tenant-paid for SFH; set if you cover water/sewer/trash</span></div>
+          <div class="field-input"><input type="number" id="utilities" value="0" /><span class="unit">$/mo</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Leasing / turnover<span class="hint">Tenant-placement fee + turn costs, amortized</span></div>
+          <div class="field-input"><input type="number" id="leasing" value="600" /><span class="unit">$/yr</span></div>
+        </div>
+      </div>
     </div>
+  </section>
+
+  <!-- ============ SECTION II — HEADLINES ============ -->
+  <section class="section">
+    <div class="section-head">
+      <div class="roman">II.</div>
+      <div class="title">The Headline Figures</div>
+      <div class="annotation">At a glance</div>
+    </div>
+
+    <div class="big-metric">
+      <div class="label">Monthly Cash Flow, net of debt &amp; expenses</div>
+      <div class="value" id="m-cashflow">—</div>
+      <div class="sub" id="m-cashflow-annual">—</div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="label">Cap Rate<span class="basis">NOI ÷ price</span></div>
+        <div class="value" id="m-cap">—</div>
+      </div>
+      <div class="metric">
+        <div class="label">Cash-on-Cash<span class="basis">year one</span></div>
+        <div class="value" id="m-coc">—</div>
+      </div>
+      <div class="metric">
+        <div class="label">Debt Service Coverage<span class="basis">NOI ÷ P&amp;I</span></div>
+        <div class="value" id="m-dscr">—</div>
+      </div>
+      <div class="metric">
+        <div class="label">Gross Rent Multiplier<span class="basis">price ÷ gross rent</span></div>
+        <div class="value" id="m-grm">—</div>
+      </div>
+      <div class="metric">
+        <div class="label">The "One Percent"<span class="basis">rent ÷ price</span></div>
+        <div class="value" id="m-1pct">—</div>
+      </div>
+      <div class="metric">
+        <div class="label">Cash Required at Close<span class="basis">down + closing</span></div>
+        <div class="value" id="m-cash-needed">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION III — LEDGER ============ -->
+  <section class="section">
+    <div class="section-head">
+      <div class="roman">III.</div>
+      <div class="title">The Annual Ledger</div>
+      <div class="annotation">Year one · pre-tax</div>
+    </div>
+
+    <div class="two-col" style="gap: 80px;">
+      <div>
+        <div class="sublabel">Operating Cash Flow</div>
+        <table class="ledger">
+          <tbody>
+            <tr><td>Gross scheduled rent</td><td id="b-gross">—</td></tr>
+            <tr class="negative indent"><td>Vacancy loss</td><td id="b-vacancy">—</td></tr>
+            <tr class="subtotal positive"><td>Effective gross income</td><td id="b-egi">—</td></tr>
+            <tr class="negative indent"><td>Property tax</td><td id="b-tax">—</td></tr>
+            <tr class="negative indent"><td>Insurance</td><td id="b-ins">—</td></tr>
+            <tr class="negative indent"><td>HOA</td><td id="b-hoa">—</td></tr>
+            <tr class="negative indent"><td>Maintenance</td><td id="b-maint">—</td></tr>
+            <tr class="negative indent"><td>Property management</td><td id="b-mgmt">—</td></tr>
+            <tr class="negative indent"><td>Utilities</td><td id="b-util">—</td></tr>
+            <tr class="negative indent"><td>Leasing / turnover</td><td id="b-lease">—</td></tr>
+            <tr class="subtotal positive"><td>Net operating income</td><td id="b-noi">—</td></tr>
+            <tr class="negative indent"><td>Debt service (P &amp; I)</td><td id="b-debt">—</td></tr>
+            <tr class="grand"><td>Annual cash flow</td><td id="b-cf">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="sublabel">Wealth Building <em>— unrealized</em></div>
+        <table class="ledger">
+          <tbody>
+            <tr class="positive"><td>Gross appreciation <span style="color:var(--ink-muted); font-style:italic;">(value × %)</span></td><td id="w-gross-apprec">—</td></tr>
+            <tr class="negative indent"><td>CapEx reserve <span style="color:var(--ink-muted); font-style:italic;">(big-ticket)</span></td><td id="w-capex">—</td></tr>
+            <tr class="grand"><td>Net appreciation</td><td id="w-net-apprec">—</td></tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top: 40px;">
+          <div class="sublabel">Five-Year Projection</div>
+          <table class="ledger projection">
+            <thead>
+              <tr><td>Year</td><td>Rent</td><td>NOI</td><td>Cash flow</td><td>Value</td><td>Net app.</td></tr>
+            </thead>
+            <tbody id="proj-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION IV — CAVEATS ============ -->
+  <section class="caveats">
+    <div class="section-head">
+      <div class="roman">IV.</div>
+      <div class="title">Caveats &amp; Externalities</div>
+      <div class="annotation">Read before acting</div>
+    </div>
+
+    <p class="caveats-intro"><span class="dropcap">A</span> report of this sort is only as honest as its admissions. The figures above are assembled from rules of thumb and publicly available heuristics — <strong>no address-specific data</strong> was retrieved, and every estimate deserves independent verification before money moves. What follows is a list of places where pro-forma arithmetic routinely fails to match reality.</p>
+
+    <h3><span class="num">i.</span>Value estimates are rough — verify before acting</h3>
+    <ul>
+      <li>The purchase price is a neighborhood midpoint guess for 95207 based on typical SFH characteristics. Pull actual comps (Redfin / Zillow / MLS) within 0.5 mi, past 90 days, matching bed/bath/sqft.</li>
+      <li>Rent assumes a 3BR/2BA SFH in typical condition. Verify via Rentometer, Zillow Rent Zestimate, and at least five active listings of comparable units in 95207.</li>
+      <li>Interior condition is not factored in. Deferred maintenance can swing rent ±15% and CapEx needs dramatically.</li>
+      <li>This tool assumes a traditional long-term lease. Short- and mid-term rental math is entirely different — higher gross, much higher expenses, and material regulatory risk.</li>
+    </ul>
+
+    <h3><span class="num">ii.</span>California &amp; Stockton specifics</h3>
+    <ul>
+      <li><strong>AB 1482 (statewide rent cap):</strong> Likely applies if the property is more than fifteen years old. Caps rent increases at 5% + CPI, maximum 10%/yr. Just-cause eviction rules apply.</li>
+      <li><strong>Stockton local ordinances:</strong> Stockton has entertained tenant-protection proposals; check current municipal code before underwriting aggressive rent growth.</li>
+      <li><strong>Prop 13 reassessment:</strong> A sale triggers reassessment at the purchase price. The seller's current tax bill is not what you will pay. Model at ~1.1–1.3% of your purchase price.</li>
+      <li><strong>Mello-Roos / special assessments:</strong> Some Stockton parcels carry CFD bonds adding $1,000–$4,000/yr on top of base property tax. Pull the full tax bill before closing.</li>
+      <li><strong>Insurance availability:</strong> California's landlord insurance market is constrained. Several carriers have paused new policies. Get a binding quote early; the FAIR Plan is a backup, but expensive and limited.</li>
+      <li><strong>Flood / levee risk:</strong> Stockton sits in the Delta. Check FEMA flood zone for the parcel; levee-protected areas may still face reclassification.</li>
+      <li><strong>Seismic:</strong> Earthquake insurance is separate (CEA). Not included in the baseline insurance figure.</li>
+      <li><strong>Property tax timing:</strong> California taxes are due 12/10 and 4/10. A supplemental tax bill often arrives after purchase and catches new investors off guard.</li>
+    </ul>
+
+    <h3><span class="num">iii.</span>Operating cost blind spots</h3>
+    <ul>
+      <li><strong>Capital expenditures are lumpy:</strong> A $12,000 roof or $8,000 HVAC replacement hits in a single year. The CapEx reserve line smooths this on paper only.</li>
+      <li><strong>Eviction cost:</strong> A non-paying tenant in California can take 3–6 months and $5,000–$15,000 in legal and lost rent to remove. Not modeled.</li>
+      <li><strong>Bad-debt loss:</strong> Vacancy covers empty units, not tenants who stop paying. Add 1–2% for realistic collection loss.</li>
+      <li><strong>Trash-out and make-ready:</strong> Post-eviction or heavy-use tenant turns can cost $3,000–$10,000+.</li>
+      <li><strong>Landlord insurance deductibles:</strong> Often $2,500–$5,000. Small claims come out of pocket.</li>
+      <li><strong>Utilities during vacancy:</strong> You pay water, gas, and electric minimums when no tenant is in place.</li>
+    </ul>
+
+    <h3><span class="num">iv.</span>Financing &amp; transaction caveats</h3>
+    <ul>
+      <li>Investment-property loans require 20–25% down minimum, price in a 0.5–0.75-point rate premium versus owner-occupied, and have stricter DTI and reserve requirements.</li>
+      <li>Closing cost estimate excludes prepaid tax and insurance impounds — those add 2–6 months of each at closing.</li>
+      <li>Buying in an LLC usually means commercial-loan terms (higher rate, shorter amortization, balloon) instead of a 30-year fixed.</li>
+      <li>Depreciation (27.5-yr SL on building basis) is not modeled here but materially improves after-tax returns.</li>
+      <li>This report shows pre-tax cash flow. Actual after-tax return depends on your marginal rate, depreciation, passive-loss rules, and whether you qualify as a real estate professional.</li>
+    </ul>
+
+    <h3><span class="num">v.</span>Market &amp; macro risks</h3>
+    <ul>
+      <li><strong>Stockton was the epicenter of the 2008 crash</strong> — prices fell approximately 65%. The market can be volatile. Do not underwrite to aggressive appreciation.</li>
+      <li>Central Valley rents track Bay Area commuter demand and Amazon / logistics employment. Remote-work unwind and warehouse-sector softness can compress rents.</li>
+      <li>The interest-rate environment affects both your refinance optionality and future exit cap rates.</li>
+      <li>Property taxes grow at Prop 13's 2%/yr cap on assessed value, but insurance and maintenance can grow faster than rent in any given year.</li>
+    </ul>
+
+    <h3><span class="num">vi.</span>What this report does <em>not</em> include</h3>
+    <ul>
+      <li>Formal inspection, appraisal, title search, or survey.</li>
+      <li>Environmental review (underground tanks, lead paint for pre-1978 construction, asbestos, radon, methamphetamine contamination).</li>
+      <li>Rent-control status verification for this specific parcel.</li>
+      <li>School district quality, crime statistics, walk scores, or neighborhood trajectory.</li>
+      <li>Legal or tax advice. Consult a California real estate attorney and CPA before purchasing.</li>
+    </ul>
+
+    <h3><span class="num">vii.</span>Data sources to verify</h3>
+    <ul>
+      <li><strong>Comparable sales:</strong> Redfin, Zillow, MLS (via agent), PropertyRadar</li>
+      <li><strong>Comparable rents:</strong> Zillow Rent Zestimate, Rentometer, Apartments.com, Craigslist active listings</li>
+      <li><strong>Tax bill:</strong> San Joaquin County Assessor-Recorder (sjgov.org)</li>
+      <li><strong>Flood zone:</strong> FEMA Flood Map Service Center (msc.fema.gov)</li>
+      <li><strong>Rent law:</strong> California Department of Real Estate + local Stockton municipal code</li>
+      <li><strong>Insurance quote:</strong> Bind with a CA-admitted carrier; don't rely on national averages</li>
+    </ul>
+
+    <div class="disclaimer">
+      Disclaimer — All figures are estimates generated from publicly available rules of thumb and default assumptions. No address-specific data was retrieved. This document is not an appraisal, investment recommendation, or offer. Independently verify every number before making a financial decision.
+    </div>
+
+  </section>
+
+  <div class="colophon">
+    <span>Set in Fraunces, Instrument Serif, &amp; IBM Plex Mono</span>
+    <span class="fleuron">❦</span>
+    <span>Rental-Pricer · rib3ye · MMXXVI</span>
   </div>
 
-  <div class="caveats panel" style="margin-top:24px;">
-    <h2>Caveats & externalities</h2>
-
-    <div class="caveat-group">
-      <h3>Value estimates are rough — verify before acting</h3>
-      <ul>
-        <li>Purchase price shown is a neighborhood midpoint guess for 95207 based on typical SFH comps. Pull actual comps (Redfin/Zillow/MLS) within 0.5 mi, past 90 days, same bed/bath/sqft.</li>
-        <li>Rent estimate assumes a 3BR/2BA SFH in typical condition. Verify via Rentometer, Zillow Rent Zestimate, and 5+ active listings of comparable units in 95207.</li>
-        <li>No interior condition data is factored in. Deferred maintenance can swing rent ±15% and CapEx needs dramatically.</li>
-        <li>This tool assumes a traditional long-term lease. Short-term/mid-term rental math is entirely different (higher gross, much higher expenses, regulatory risk).</li>
-      </ul>
-    </div>
-
-    <div class="caveat-group">
-      <h3>California / Stockton-specific risks</h3>
-      <ul>
-        <li><strong>AB 1482 (statewide rent cap):</strong> Likely applies if the property is >15 years old. Caps rent increases at 5% + CPI, max 10%/yr. Just-cause eviction rules apply.</li>
-        <li><strong>Stockton local ordinances:</strong> Stockton has had tenant-protection proposals; check current municipal code before underwriting aggressive rent growth.</li>
-        <li><strong>Prop 13 reassessment:</strong> Purchase triggers reassessment at sale price. Seller's current tax bill is NOT what you'll pay. Model at ~1.1–1.3% of your purchase price.</li>
-        <li><strong>Mello-Roos / special assessments:</strong> Some Stockton parcels carry CFD bonds adding $1,000–$4,000/yr. Pull the tax bill before closing.</li>
-        <li><strong>Insurance availability:</strong> CA homeowner/landlord insurance market is constrained. Several carriers have paused new policies. Get a binding quote early; FAIR Plan is backup but expensive and limited.</li>
-        <li><strong>Flood / levee risk:</strong> Stockton sits in the Delta. Check FEMA flood zone for this parcel; levee-protected areas may still require flood insurance or face reclassification.</li>
-        <li><strong>Seismic:</strong> Earthquake insurance is separate (CEA). Not included in baseline insurance figure.</li>
-        <li><strong>Property tax timing:</strong> CA taxes are due 12/10 and 4/10. Supplemental tax bill after purchase can catch new investors off guard.</li>
-      </ul>
-    </div>
-
-    <div class="caveat-group">
-      <h3>Operating cost blind spots</h3>
-      <ul>
-        <li><strong>Capital expenditures are lumpy:</strong> A $12k roof or $8k HVAC replacement hits in one year, not spread evenly. The CapEx reserve line smooths this on paper only.</li>
-        <li><strong>Eviction cost:</strong> A non-paying tenant in CA can take 3–6 months and $5k–$15k in legal/lost rent to remove. Not included.</li>
-        <li><strong>Bad-debt loss:</strong> Vacancy % covers empty units, not tenants who stop paying. Add 1–2% for realistic collection loss.</li>
-        <li><strong>Trash-out and make-ready:</strong> Post-eviction or heavy-use tenant turns can cost $3k–$10k+.</li>
-        <li><strong>Landlord insurance deductibles:</strong> Often $2,500–$5,000. Small claims come out of pocket.</li>
-        <li><strong>Utilities during vacancy:</strong> You pay water/gas/electric minimums when no tenant is in place.</li>
-      </ul>
-    </div>
-
-    <div class="caveat-group">
-      <h3>Financing & transaction caveats</h3>
-      <ul>
-        <li>Investment-property loans require 20–25% down minimum, price in 0.5–0.75% rate premium vs. owner-occupied, and have stricter DTI/reserve requirements.</li>
-        <li>Closing cost estimate excludes prepaid tax/insurance impounds — those add 2–6 months of each at closing.</li>
-        <li>If buying in an LLC, expect commercial-loan terms (higher rate, shorter amortization, balloon) instead of 30-yr fixed.</li>
-        <li>Depreciation (27.5-yr SL on building basis) is not modeled here but materially improves after-tax returns.</li>
-        <li>This tool shows pre-tax cash flow. Your actual after-tax return depends on your marginal rate, depreciation, passive-loss rules, and whether you qualify as a real estate professional.</li>
-      </ul>
-    </div>
-
-    <div class="caveat-group">
-      <h3>Market & macro risks</h3>
-      <ul>
-        <li><strong>Stockton was the epicenter of the 2008 crash</strong> — prices fell ~65%. The market can be volatile. Don't underwrite to aggressive appreciation.</li>
-        <li>Central Valley rents track Bay Area commuter demand and Amazon/logistics employment. Remote-work unwind and warehouse-sector softness can compress rents.</li>
-        <li>Interest-rate environment affects both your refinance optionality and future exit cap rates.</li>
-        <li>Property taxes grow at Prop 13's 2%/yr cap for the assessed value, but insurance and maintenance can grow faster than rent in any given year.</li>
-      </ul>
-    </div>
-
-    <div class="caveat-group">
-      <h3>What this report does NOT include</h3>
-      <ul>
-        <li>Formal inspection, appraisal, title search, or survey.</li>
-        <li>Environmental review (underground tanks, lead paint for pre-1978, asbestos, radon, meth contamination).</li>
-        <li>Rent-control status verification for this specific parcel.</li>
-        <li>School district quality, crime stats, walk scores, or neighborhood trajectory — all of which affect tenant quality and long-term rent growth.</li>
-        <li>Legal/tax advice. Consult a CA real estate attorney and CPA before purchasing.</li>
-      </ul>
-    </div>
-
-    <div class="caveat-group">
-      <h3>Data sources to verify before acting on this report</h3>
-      <ul>
-        <li>Comparable sales: Redfin, Zillow, MLS (via agent), PropertyRadar</li>
-        <li>Comparable rents: Zillow Rent Zestimate, Rentometer, Apartments.com, Craigslist active listings</li>
-        <li>Tax bill: San Joaquin County Assessor-Recorder (sjgov.org)</li>
-        <li>Flood zone: FEMA Flood Map Service Center (msc.fema.gov)</li>
-        <li>Rent law: CA Dept. of Real Estate + local Stockton municipal code</li>
-        <li>Insurance quote: Get a real bind from a CA-admitted carrier; don't rely on national averages</li>
-      </ul>
-    </div>
-
-    <div class="caveat-group" style="border-top:1px solid var(--border); padding-top:12px;">
-      <h3 style="color:var(--muted)">Disclaimer</h3>
-      <ul style="color:var(--muted); font-size:12px;">
-        <li>All figures are estimates generated from publicly-available rules of thumb and default assumptions. No address-specific data was retrieved. This is not an appraisal, investment recommendation, or offer. Independently verify every number before making a financial decision.</li>
-      </ul>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -503,9 +944,13 @@
     rentGrowth: 3.0, expGrowth: 3.0, appreciation: 3.5
   };
 
-  const fmt$ = n => (n < 0 ? '-$' : '$') + Math.abs(Math.round(n)).toLocaleString();
-  const fmtPct = n => (n).toFixed(2) + '%';
-  const fmtNum = n => n.toFixed(2);
+  // Accounting convention: negatives in parentheses
+  const fmt$ = n => {
+    const abs = '$' + Math.abs(Math.round(n)).toLocaleString();
+    return n < 0 ? '(' + abs + ')' : abs;
+  };
+  const fmtPct = n => (isFinite(n) ? n.toFixed(2) : '—') + '%';
+  const fmtNum = n => isFinite(n) ? n.toFixed(2) : '∞';
 
   function getInputs() {
     const o = {};
@@ -528,10 +973,8 @@
     const i = getInputs();
     const paidOff = document.getElementById('paidOff').checked;
 
-    // Disable financing fields visually when paid off
     ['downPct','rate','term'].forEach(id => {
       document.getElementById(id).disabled = paidOff;
-      document.getElementById(id).style.opacity = paidOff ? 0.4 : 1;
     });
 
     const downPayment = paidOff ? i.price : i.price * i.downPct / 100;
@@ -567,11 +1010,11 @@
     const onePct = (i.rent / i.price) * 100;
     const dscr = annualDebtService > 0 ? noi / annualDebtService : Infinity;
 
-    // Render metrics
+    // Headline
     const cfEl = document.getElementById('m-cashflow');
-    cfEl.textContent = fmt$(monthlyCashFlow) + '/mo';
+    cfEl.innerHTML = fmt$(monthlyCashFlow) + '<span class="unit">/mo</span>';
     cfEl.className = 'value ' + (monthlyCashFlow >= 0 ? 'good' : 'bad');
-    document.getElementById('m-cashflow-annual').textContent = fmt$(annualCashFlow) + '/yr';
+    document.getElementById('m-cashflow-annual').textContent = fmt$(annualCashFlow) + ' per annum';
 
     const capEl = document.getElementById('m-cap');
     capEl.textContent = fmtPct(capRate);
@@ -582,7 +1025,7 @@
     cocEl.className = 'value ' + (coc >= 6 ? 'good' : coc < 0 ? 'bad' : '');
 
     document.getElementById('m-grm').textContent = fmtNum(grm);
-    document.getElementById('m-1pct').textContent = fmtPct(onePct) + ' (target ≥1%)';
+    document.getElementById('m-1pct').textContent = fmtPct(onePct);
 
     const dscrEl = document.getElementById('m-dscr');
     dscrEl.textContent = isFinite(dscr) ? fmtNum(dscr) : '∞';
@@ -590,7 +1033,7 @@
 
     document.getElementById('m-cash-needed').textContent = fmt$(cashNeeded);
 
-    // Breakdown
+    // Annual ledger
     document.getElementById('b-gross').textContent = fmt$(grossRent);
     document.getElementById('b-vacancy').textContent = fmt$(-vacancy);
     document.getElementById('b-egi').textContent = fmt$(egi);
@@ -610,7 +1053,7 @@
     document.getElementById('w-capex').textContent = fmt$(-capex);
     document.getElementById('w-net-apprec').textContent = fmt$(netApprec);
 
-    // 5-yr projection
+    // 5-year projection
     const body = document.getElementById('proj-body');
     body.innerHTML = '';
     let rentY = grossRent, opexY = opex, valY = i.price, capexY = capex;
@@ -627,9 +1070,13 @@
       const apprecY = valY * i.appreciation / 100;
       const netApprecY = apprecY - capexY;
       const row = document.createElement('tr');
-      row.innerHTML = `<td>Year ${y}</td><td>${fmt$(rentY)}</td><td>${fmt$(noiY)}</td><td>${fmt$(cfY)}</td><td>${fmt$(valY)}</td><td>${fmt$(netApprecY)}</td>`;
+      row.innerHTML = `<td>${toRoman(y)}.</td><td>${fmt$(rentY)}</td><td>${fmt$(noiY)}</td><td>${fmt$(cfY)}</td><td>${fmt$(valY)}</td><td>${fmt$(netApprecY)}</td>`;
       body.appendChild(row);
     }
+  }
+
+  function toRoman(n) {
+    return ['I','II','III','IV','V','VI','VII','VIII','IX','X'][n-1] || String(n);
   }
 
   const STORAGE_KEY = 'rental-pricer-3002-hillview';
@@ -669,13 +1116,18 @@
     const v = el.value.replace(/^(-?)0+(\d)/, '$1$2');
     if (v !== el.value) el.value = v;
   }
+
   document.querySelectorAll('input').forEach(el => {
     el.addEventListener('input', () => { compute(); saveState(); });
     el.addEventListener('change', () => { stripLeadingZeros(el); compute(); saveState(); });
     el.addEventListener('blur', () => { stripLeadingZeros(el); });
   });
 
-  document.getElementById('today').textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  // Set date in old-newsprint style
+  const d = new Date();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('today').textContent = months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+
   loadState();
   compute();
 </script>
