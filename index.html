@@ -643,9 +643,15 @@
     compute();
   }
 
+  function stripLeadingZeros(el) {
+    if (el.type !== 'number') return;
+    const v = el.value.replace(/^(-?)0+(\d)/, '$1$2');
+    if (v !== el.value) el.value = v;
+  }
   document.querySelectorAll('input').forEach(el => {
     el.addEventListener('input', () => { compute(); saveState(); });
-    el.addEventListener('change', () => { compute(); saveState(); });
+    el.addEventListener('change', () => { stripLeadingZeros(el); compute(); saveState(); });
+    el.addEventListener('blur', () => { stripLeadingZeros(el); });
   });
 
   document.getElementById('today').textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });

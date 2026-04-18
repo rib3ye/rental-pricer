@@ -1278,10 +1278,16 @@ function leaveList() {
 // =========================================================
 // Wire up inputs
 // =========================================================
+function stripLeadingZeros(el) {
+  if (el.type !== 'number') return;
+  const v = el.value.replace(/^(-?)0+(\d)/, '$1$2');
+  if (v !== el.value) el.value = v;
+}
 document.querySelectorAll('.panel input, #paidOff').forEach(el => {
   if (el.id === 'p-name' || el.id === 'p-address') return;
   el.addEventListener('input', compute);
-  el.addEventListener('change', compute);
+  el.addEventListener('change', () => { stripLeadingZeros(el); compute(); });
+  el.addEventListener('blur', () => { stripLeadingZeros(el); });
 });
 
 // =========================================================
